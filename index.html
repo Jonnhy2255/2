@@ -156,6 +156,7 @@
         const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
         recognition.lang = "fr-FR";
         recognition.interimResults = false;
+        recognition.continuous = true; // Activer la reconnaissance continue
         let isListening = false;
 
         micButton.addEventListener("click", () => {
@@ -188,9 +189,15 @@
         }
 
         recognition.onresult = (event) => {
-            const transcript = event.results[0][0].transcript;
+            const transcript = event.results[event.results.length - 1][0].transcript;
             console.log("Texte reconnu :", transcript);
             sendToAI(transcript);
+        };
+
+        recognition.onend = () => {
+            if (isListening) {
+                recognition.start(); // Redémarrer la reconnaissance si l'utilisateur n'a pas arrêté
+            }
         };
 
         function sendToAI(text) {
