@@ -168,6 +168,7 @@
         recognition.interimResults = false;
         recognition.continuous = true; // Activer la reconnaissance continue
         let isListening = false;
+        let recognizedText = ""; // Stocker le texte reconnu
 
         micButton.addEventListener("click", () => {
             if (!isListening) {
@@ -179,6 +180,7 @@
 
         function startListening() {
             isListening = true;
+            recognizedText = ""; // Réinitialiser le texte reconnu
             recognition.start();
 
             micIcon.style.display = "none";
@@ -196,12 +198,17 @@
                 stopIcon = null;
             }
             micIcon.style.display = "block";
+
+            // Répéter le texte reconnu lorsque la reconnaissance s'arrête
+            if (recognizedText) {
+                parler(recognizedText);
+            }
         }
 
         recognition.onresult = (event) => {
             const transcript = event.results[event.results.length - 1][0].transcript;
+            recognizedText = transcript; // Stocker le texte reconnu
             console.log("Texte reconnu :", transcript);
-            parler(transcript); // Faire parler l'IA
         };
 
         recognition.onend = () => {
