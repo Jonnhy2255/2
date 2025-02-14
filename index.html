@@ -22,7 +22,7 @@
             position: relative;
             display: flex;
             align-items: center;
-            transform: translate(-6px, -50px); /* Décalage de 5px vers la gauche et 20px vers le haut */
+            transform: translate(-6px, -50px);
         }
         .boule {
             width: 120px;
@@ -123,7 +123,6 @@
         .boule.parler {
             animation: parler 0.5s infinite ease-in-out;
         }
-
     </style>
     <!-- Lien vers Font Awesome pour les icônes -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -202,7 +201,7 @@
         recognition.onresult = (event) => {
             const transcript = event.results[event.results.length - 1][0].transcript;
             console.log("Texte reconnu :", transcript);
-            simulateParler(transcript);
+            parler(transcript); // Faire parler l'IA
         };
 
         recognition.onend = () => {
@@ -211,12 +210,23 @@
             }
         };
 
-        function simulateParler(text) {
+        function parler(text) {
+            // Ajouter l'animation de parole à la boule
             boule.classList.add("parler");
-            setTimeout(() => {
+
+            // Utiliser la synthèse vocale pour faire parler l'IA
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = "fr-FR"; // Définir la langue
+            utterance.rate = 1; // Vitesse de parole
+            utterance.pitch = 1; // Hauteur de la voix
+
+            // Démarrer la synthèse vocale
+            window.speechSynthesis.speak(utterance);
+
+            // Arrêter l'animation de parole lorsque la synthèse vocale est terminée
+            utterance.onend = () => {
                 boule.classList.remove("parler");
-                alert("Réponse de l'IA: " + text);
-            }, 2000); // Simule une durée de parole de 2 secondes
+            };
         }
 
         // Ajout d'un événement pour le bouton "plus"
@@ -224,7 +234,6 @@
         plusButton.addEventListener("click", () => {
             alert("Bouton + cliqué !");
         });
-
     </script>
 </body>
 </html>
