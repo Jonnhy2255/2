@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Effet d'Onde Sonore</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #1a1a1a;
+            overflow: hidden;
+        }
+        .container {
+            position: relative;
+            display: flex;
+            align-items: center;
+            transform: translate(-6px, -50px); /* Décalage de 5px vers la gauche et 20px vers le haut */
+        }
+        .boule {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #2a2a2a, #4b0082, #8b0000, #000);
+            background-size: 200% 200%;
+            animation: rotation 5s linear infinite, degrade 6s ease infinite alternate;
+            box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
+        }
+
+        .wave-container {
+            display: flex;
+            gap: 5px;
+            position: absolute;
+            width: 60px;
+            height: 40px;
+            align-items: center;
+        }
+
+        .wave {
+            width: 5px;
+            height: 100%;
+            background: linear-gradient(180deg, #4b0082, #8b0000);
+            border-radius: 5px;
+            animation: sound-wave 1s infinite ease-in-out;
+        }
+
+        .wave-container.left {
+            left: -80px;
+        }
+        .wave-container.right {
+            right: -95px;
+        }
+
+        @keyframes rotation {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        @keyframes degrade {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 100% 50%; }
+        }
+        @keyframes sound-wave {
+            0%, 100% { transform: scaleY(1); }
+            50% { transform: scaleY(1.5); }
+        }
+
+        .wave:nth-child(1) { animation-delay: 0s; }
+        .wave:nth-child(2) { animation-delay: 0.2s; }
+        .wave:nth-child(3) { animation-delay: 0.4s; }
+        .wave:nth-child(4) { animation-delay: 0.6s; }
+        .wave:nth-child(5) { animation-delay: 0.8s; }
+
+        /* Styles des boutons (micro et plus) */
+        .action-button {
+            position: fixed;
+            bottom: 20px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #4b0082, #8b0000);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
+            cursor: pointer;
+            border: none;
+        }
+
+        .action-button i {
+            color: white;
+            font-size: 24px;
+        }
+
+        /* Position des boutons */
+        .microphone-button {
+            right: 20px;
+        }
+
+        .plus-button {
+            left: 20px;
+        }
+
+        /* Icône stop (carré centré) */
+        .stop-icon {
+            width: 18px;
+            height: 18px;
+            background-color: white;
+        }
+
+    </style>
+    <!-- Lien vers Font Awesome pour les icônes -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="wave-container left">
+            <div class="wave"></div>
+            <div class="wave"></div>
+            <div class="wave"></div>
+            <div class="wave"></div>
+            <div class="wave"></div>
+        </div>
+
+        <div class="boule"></div>
+
+        <div class="wave-container right">
+            <div class="wave"></div>
+            <div class="wave"></div>
+            <div class="wave"></div>
+            <div class="wave"></div>
+            <div class="wave"></div>
+        </div>
+    </div>
+
+    <!-- Bouton microphone -->
+    <div id="micButton" class="action-button microphone-button">
+        <i class="fas fa-microphone"></i>
+    </div>
+
+    <!-- Bouton plus -->
+    <div id="plusButton" class="action-button plus-button">
+        <i class="fas fa-plus"></i>
+    </div>
+
+    <script>
+        const micButton = document.getElementById("micButton");
+        const micIcon = micButton.querySelector("i");
+        let stopIcon = null;
+        const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+        recognition.lang = "fr-FR";
+        recognition.interimResults = false;
+        let isListening = false;
+
+        micButton.addEventListener("click", () => {
+            if (!isListening) {
+                startListening();
+            } else {
+                stopListening();
+            }
+        });
+
+        function startListening() {
+            isListening = true;
+            recognition.start();
+
+            micIcon.style.display = "none";
+            stopIcon = document.createElement("div");
+            stopIcon.classList.add("stop-icon");
+            micButton.appendChild(stopIcon);
+        }
+
+        function stopListening() {
+            isListening = false;
+            recognition.stop();
+
+            if (stopIcon) {
+                micButton.removeChild(stopIcon);
+                stopIcon = null;
+            }
+            micIcon.style.display = "block";
+        }
+
+        recognition.onresult = (event) => {
+            const transcript = event.results[0][0].transcript;
+            console.log("Texte reconnu :", transcript);
+            sendToAI(transcript);
+        };
+
+        function sendToAI(text) {
+            console.log("Envoi à l'IA :", text);
+            alert("Réponse de l'IA: " + text);
+        }
+
+        // Ajout d'un événement pour le bouton "plus"
+        const plusButton = document.getElementById("plusButton");
+        plusButton.addEventListener("click", () => {
+            alert("Bouton + cliqué !");
+        });
+
+    </script>
+</body>
+</html>
