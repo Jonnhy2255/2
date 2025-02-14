@@ -22,7 +22,7 @@
             position: relative;
             display: flex;
             align-items: center;
-            transform: translate(-6px, -50px);
+            transform: translate(-6px, -50px); /* Décalage de 5px vers la gauche et 20px vers le haut */
         }
         .boule {
             width: 120px;
@@ -117,12 +117,13 @@
         /* Animation pour l'agrandissement et le rétrécissement de la boule */
         @keyframes parler {
             0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
+            50% { transform: scale(var(--scale-intensity, 1.1)); }
         }
 
         .boule.parler {
             animation: parler 0.5s infinite ease-in-out;
         }
+
     </style>
     <!-- Lien vers Font Awesome pour les icônes -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -168,7 +169,13 @@
         recognition.interimResults = false;
         recognition.continuous = true; // Activer la reconnaissance continue
         let isListening = false;
-        let recognizedText = ""; // Stocker le texte reconnu
+
+        // Configuration de l'analyseur audio
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        let analyser = audioContext.createAnalyser();
+        analyser.fftSize = 256;
+        const bufferLength = analyser.frequencyBinCount;
+        const dataArray = new Uint8Array(bufferLength);
 
         micButton.addEventListener("click", () => {
             if (!isListening) {
@@ -180,13 +187,23 @@
 
         function startListening() {
             isListening = true;
-            recognizedText = ""; // Réinitialiser le texte reconnu
             recognition.start();
 
             micIcon.style.display = "none";
             stopIcon = document.createElement("div");
             stopIcon.classList.add("stop-icon");
             micButton.appendChild(stopIcon);
+
+            // Démarrer l'analyse audio
+            navigator.mediaDevices.getUserMedia({ audio: true })
+                .then(stream => {
+                    const source = audioContext.createMediaStreamSource(stream);
+                    source.connect(analyser);
+                    updateBouleIntensity();
+                })
+                .catch(err => {
+                    console.error("Erreur lors de l'accès au microphone:", err);
+                });
         }
 
         function stopListening() {
@@ -198,17 +215,12 @@
                 stopIcon = null;
             }
             micIcon.style.display = "block";
-
-            // Répéter le texte reconnu lorsque la reconnaissance s'arrête
-            if (recognizedText) {
-                parler(recognizedText);
-            }
         }
 
         recognition.onresult = (event) => {
             const transcript = event.results[event.results.length - 1][0].transcript;
-            recognizedText = transcript; // Stocker le texte reconnu
             console.log("Texte reconnu :", transcript);
+            simulateParler(transcript);
         };
 
         recognition.onend = () => {
@@ -217,23 +229,21 @@
             }
         };
 
-        function parler(text) {
-            // Ajouter l'animation de parole à la boule
+        function simulateParler(text) {
             boule.classList.add("parler");
-
-            // Utiliser la synthèse vocale pour faire parler l'IA
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = "fr-FR"; // Définir la langue
-            utterance.rate = 1; // Vitesse de parole
-            utterance.pitch = 1; // Hauteur de la voix
-
-            // Démarrer la synthèse vocale
-            window.speechSynthesis.speak(utterance);
-
-            // Arrêter l'animation de parole lorsque la synthèse vocale est terminée
-            utterance.onend = () => {
+            setTimeout(() => {
                 boule.classList.remove("parler");
-            };
+                alert("Réponse de l'IA: " + text);
+            }, 2000); // Simule une durée de parole de 2 secondes
+        }
+
+        function updateBouleIntensity() {
+            analyser.getByteFrequencyData(dataArray);
+            const intensity = dataArray.reduce((a, b) => a + b, 0) / bufferLength;
+            const scaleIntensity = 1 + (intensity / 255) * 0.5; // Ajuster l'échelle en fonction de l'intensité
+            boule.style.setProperty('--scale-intensity', scaleIntensity);
+
+            requestAnimationFrame(updateBouleIntensity);
         }
 
         // Ajout d'un événement pour le bouton "plus"
@@ -241,6 +251,7 @@
         plusButton.addEventListener("click", () => {
             alert("Bouton + cliqué !");
         });
+
     </script>
 </body>
 </html>
