@@ -117,7 +117,7 @@
         /* Animation pour l'agrandissement et le rétrécissement de la boule */
         @keyframes parler {
             0%, 100% { transform: scale(1); }
-            50% { transform: scale(var(--scale-intensity, 1.1)); }
+            50% { transform: scale(1.1); }
         }
 
         .boule.parler {
@@ -170,13 +170,6 @@
         recognition.continuous = true; // Activer la reconnaissance continue
         let isListening = false;
 
-        // Configuration de l'analyseur audio
-        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        let analyser = audioContext.createAnalyser();
-        analyser.fftSize = 256;
-        const bufferLength = analyser.frequencyBinCount;
-        const dataArray = new Uint8Array(bufferLength);
-
         micButton.addEventListener("click", () => {
             if (!isListening) {
                 startListening();
@@ -193,17 +186,6 @@
             stopIcon = document.createElement("div");
             stopIcon.classList.add("stop-icon");
             micButton.appendChild(stopIcon);
-
-            // Démarrer l'analyse audio
-            navigator.mediaDevices.getUserMedia({ audio: true })
-                .then(stream => {
-                    const source = audioContext.createMediaStreamSource(stream);
-                    source.connect(analyser);
-                    updateBouleIntensity();
-                })
-                .catch(err => {
-                    console.error("Erreur lors de l'accès au microphone:", err);
-                });
         }
 
         function stopListening() {
@@ -235,15 +217,6 @@
                 boule.classList.remove("parler");
                 alert("Réponse de l'IA: " + text);
             }, 2000); // Simule une durée de parole de 2 secondes
-        }
-
-        function updateBouleIntensity() {
-            analyser.getByteFrequencyData(dataArray);
-            const intensity = dataArray.reduce((a, b) => a + b, 0) / bufferLength;
-            const scaleIntensity = 1 + (intensity / 255) * 0.5; // Ajuster l'échelle en fonction de l'intensité
-            boule.style.setProperty('--scale-intensity', scaleIntensity);
-
-            requestAnimationFrame(updateBouleIntensity);
         }
 
         // Ajout d'un événement pour le bouton "plus"
