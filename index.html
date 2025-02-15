@@ -169,6 +169,10 @@
         recognition.interimResults = false;
         recognition.continuous = true; // Activer la reconnaissance continue
         let isListening = false;
+        let recordedText = ""; // Stocke le texte reconnu
+
+        // Initialisation de la synthèse vocale
+        const synth = window.speechSynthesis;
 
         micButton.addEventListener("click", () => {
             if (!isListening) {
@@ -197,12 +201,18 @@
                 stopIcon = null;
             }
             micIcon.style.display = "block";
+
+            // L'IA commence à parler et la boule s'anime
+            if (recordedText) {
+                simulateParler(recordedText);
+            }
+            recordedText = ""; // Réinitialise le texte enregistré
         }
 
         recognition.onresult = (event) => {
             const transcript = event.results[event.results.length - 1][0].transcript;
             console.log("Texte reconnu :", transcript);
-            simulateParler(transcript);
+            recordedText = transcript; // Stocke le texte reconnu
         };
 
         recognition.onend = () => {
@@ -213,10 +223,18 @@
 
         function simulateParler(text) {
             boule.classList.add("parler");
-            setTimeout(() => {
-                boule.classList.remove("parler");
-                alert("Réponse de l'IA: " + text);
-            }, 2000); // Simule une durée de parole de 2 secondes
+
+            // Utilisation de la synthèse vocale pour faire parler l'IA
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = "fr-FR"; // Langue française
+            utterance.onstart = () => {
+                console.log("L'IA commence à parler");
+            };
+            utterance.onend = () => {
+                console.log("L'IA a fini de parler");
+                boule.classList.remove("parler"); // Arrête l'animation de la boule
+            };
+            synth.speak(utterance); // Faire parler l'IA
         }
 
         // Ajout d'un événement pour le bouton "plus"
