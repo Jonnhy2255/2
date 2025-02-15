@@ -103,7 +103,7 @@
             right: 20px;
         }
 
-        .plus-button {
+        .camera-button {
             left: 20px;
         }
 
@@ -154,9 +154,9 @@
         <i class="fas fa-microphone"></i>
     </div>
 
-    <!-- Bouton plus -->
-    <div id="plusButton" class="action-button plus-button">
-        <i class="fas fa-plus"></i>
+    <!-- Bouton caméra vidéo -->
+    <div id="cameraButton" class="action-button camera-button">
+        <i class="fas fa-video"></i> <!-- Icône de caméra vidéo -->
     </div>
 
     <script>
@@ -237,10 +237,10 @@
             synth.speak(utterance); // Faire parler l'IA
         }
 
-        // Ajout d'un événement pour le bouton "plus"
-        const plusButton = document.getElementById("plusButton");
-        plusButton.addEventListener("click", () => {
-            alert("Bouton + cliqué !");
+        // Ajout d'un événement pour le bouton "camera"
+        const cameraButton = document.getElementById("cameraButton");
+        cameraButton.addEventListener("click", () => {
+            alert("Fonction pas encore disponible"); // Message d'alerte
         });
 
     </script>
