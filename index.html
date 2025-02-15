@@ -249,6 +249,11 @@
 
         // Faire parler l'IA
         function simulateParler(text) {
+            // Annuler toute synthèse vocale en cours
+            if (window.speechSynthesis.speaking) {
+                window.speechSynthesis.cancel();
+            }
+
             boule.classList.add("parler");
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.lang = "fr-FR";
@@ -260,7 +265,16 @@
                 console.log("L'IA a fini de parler");
                 boule.classList.remove("parler");
             };
-            synth.speak(utterance);
+            utterance.onerror = (event) => {
+                console.error("Erreur de synthèse vocale :", event.error);
+                boule.classList.remove("parler");
+            };
+
+            // Vérifier que la synthèse vocale est prête
+            if (window.speechSynthesis.paused || window.speechSynthesis.speaking) {
+                window.speechSynthesis.cancel(); // Annuler et réessayer
+            }
+            window.speechSynthesis.speak(utterance);
         }
     </script>
 </body>
