@@ -193,6 +193,7 @@
             stopIcon = document.createElement("div");
             stopIcon.classList.add("stop-icon");
             micButton.appendChild(stopIcon);
+            recordedText = ""; // Réinitialiser le texte enregistré
         }
 
         function stopListening() {
@@ -206,7 +207,6 @@
             if (recordedText) {
                 processSpeech(recordedText);
             }
-            recordedText = "";
         }
 
         recognition.onresult = (event) => {
@@ -254,6 +254,7 @@
             utterance.lang = "fr-FR";
             utterance.onstart = () => {
                 console.log("L'IA commence à parler");
+                recordedText = ""; // Effacer le texte enregistré
             };
             utterance.onend = () => {
                 console.log("L'IA a fini de parler");
