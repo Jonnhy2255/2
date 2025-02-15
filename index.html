@@ -15,14 +15,18 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background-color: #1a1a1a;
+            background-color: #1a1a1a; /* Thème sombre par défaut */
             overflow: hidden;
+            transition: background-color 0.5s ease;
+        }
+        body.light-theme {
+            background-color: #f0f0f0; /* Fond clair pour le thème clair */
         }
         .container {
             position: relative;
             display: flex;
             align-items: center;
-            transform: translate(-6px, -50px); /* Décalage de 5px vers la gauche et 20px vers le haut */
+            transform: translate(-6px, -50px);
         }
         .boule {
             width: 120px;
@@ -32,8 +36,12 @@
             background-size: 200% 200%;
             animation: rotation 5s linear infinite, degrade 6s ease infinite alternate;
             box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
+            transition: background 0.5s ease, box-shadow 0.5s ease;
         }
-
+        .light-theme .boule {
+            background: linear-gradient(135deg, #e0e0e0, #9370db, #ff7f50, #fff);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
         .wave-container {
             display: flex;
             gap: 5px;
@@ -42,22 +50,23 @@
             height: 40px;
             align-items: center;
         }
-
         .wave {
             width: 5px;
             height: 100%;
             background: linear-gradient(180deg, #4b0082, #8b0000);
             border-radius: 5px;
             animation: sound-wave 1s infinite ease-in-out;
+            transition: background 0.5s ease;
         }
-
+        .light-theme .wave {
+            background: linear-gradient(180deg, #9370db, #ff7f50);
+        }
         .wave-container.left {
             left: -80px;
         }
         .wave-container.right {
             right: -95px;
         }
-
         @keyframes rotation {
             from { transform: rotate(0deg); }
             to { transform: rotate(360deg); }
@@ -70,14 +79,11 @@
             0%, 100% { transform: scaleY(1); }
             50% { transform: scaleY(1.5); }
         }
-
         .wave:nth-child(1) { animation-delay: 0s; }
         .wave:nth-child(2) { animation-delay: 0.2s; }
         .wave:nth-child(3) { animation-delay: 0.4s; }
         .wave:nth-child(4) { animation-delay: 0.6s; }
         .wave:nth-child(5) { animation-delay: 0.8s; }
-
-        /* Styles des boutons (micro et plus) */
         .action-button {
             position: fixed;
             bottom: 20px;
@@ -91,41 +97,35 @@
             box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
             cursor: pointer;
             border: none;
+            transition: background 0.5s ease, box-shadow 0.5s ease;
         }
-
+        .light-theme .action-button {
+            background: linear-gradient(135deg, #9370db, #ff7f50);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
         .action-button i {
             color: white;
             font-size: 24px;
         }
-
-        /* Position des boutons */
         .microphone-button {
             right: 20px;
         }
-
         .camera-button {
             left: 20px;
         }
-
-        /* Icône stop (carré centré) */
         .stop-icon {
             width: 18px;
             height: 18px;
             background-color: white;
         }
-
-        /* Animation pour l'agrandissement et le rétrécissement de la boule */
         @keyframes parler {
             0%, 100% { transform: scale(1); }
             50% { transform: scale(1.1); }
         }
-
         .boule.parler {
             animation: parler 0.5s infinite ease-in-out;
         }
-
     </style>
-    <!-- Lien vers Font Awesome pour les icônes -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
@@ -137,9 +137,7 @@
             <div class="wave"></div>
             <div class="wave"></div>
         </div>
-
         <div class="boule"></div>
-
         <div class="wave-container right">
             <div class="wave"></div>
             <div class="wave"></div>
@@ -148,31 +146,38 @@
             <div class="wave"></div>
         </div>
     </div>
-
-    <!-- Bouton microphone -->
     <div id="micButton" class="action-button microphone-button">
         <i class="fas fa-microphone"></i>
     </div>
-
-    <!-- Bouton caméra vidéo -->
     <div id="cameraButton" class="action-button camera-button">
-        <i class="fas fa-video"></i> <!-- Icône de caméra vidéo -->
+        <i class="fas fa-video"></i>
     </div>
-
     <script>
         const micButton = document.getElementById("micButton");
         const micIcon = micButton.querySelector("i");
         const boule = document.querySelector(".boule");
+        const cameraButton = document.getElementById("cameraButton");
+        const body = document.body;
         let stopIcon = null;
         const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
         recognition.lang = "fr-FR";
         recognition.interimResults = false;
-        recognition.continuous = true; // Activer la reconnaissance continue
+        recognition.continuous = true;
         let isListening = false;
-        let recordedText = ""; // Stocke le texte reconnu
+        let recordedText = "";
 
-        // Initialisation de la synthèse vocale
-        const synth = window.speechSynthesis;
+        // Vérifier le thème sauvegardé
+        const savedTheme = localStorage.getItem("theme");
+        if (savedTheme === "light") {
+            body.classList.add("light-theme");
+        }
+
+        // Basculer entre les thèmes
+        cameraButton.addEventListener("click", () => {
+            body.classList.toggle("light-theme");
+            const isLightTheme = body.classList.contains("light-theme");
+            localStorage.setItem("theme", isLightTheme ? "light" : "dark");
+        });
 
         micButton.addEventListener("click", () => {
             if (!isListening) {
@@ -185,7 +190,6 @@
         function startListening() {
             isListening = true;
             recognition.start();
-
             micIcon.style.display = "none";
             stopIcon = document.createElement("div");
             stopIcon.classList.add("stop-icon");
@@ -195,54 +199,42 @@
         function stopListening() {
             isListening = false;
             recognition.stop();
-
             if (stopIcon) {
                 micButton.removeChild(stopIcon);
                 stopIcon = null;
             }
             micIcon.style.display = "block";
-
-            // L'IA commence à parler et la boule s'anime
             if (recordedText) {
                 simulateParler(recordedText);
             }
-            recordedText = ""; // Réinitialise le texte enregistré
+            recordedText = "";
         }
 
         recognition.onresult = (event) => {
             const transcript = event.results[event.results.length - 1][0].transcript;
             console.log("Texte reconnu :", transcript);
-            recordedText = transcript; // Stocke le texte reconnu
+            recordedText = transcript;
         };
 
         recognition.onend = () => {
             if (isListening) {
-                recognition.start(); // Redémarrer la reconnaissance si l'utilisateur n'a pas arrêté
+                recognition.start();
             }
         };
 
         function simulateParler(text) {
             boule.classList.add("parler");
-
-            // Utilisation de la synthèse vocale pour faire parler l'IA
             const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = "fr-FR"; // Langue française
+            utterance.lang = "fr-FR";
             utterance.onstart = () => {
                 console.log("L'IA commence à parler");
             };
             utterance.onend = () => {
                 console.log("L'IA a fini de parler");
-                boule.classList.remove("parler"); // Arrête l'animation de la boule
+                boule.classList.remove("parler");
             };
-            synth.speak(utterance); // Faire parler l'IA
+            synth.speak(utterance);
         }
-
-        // Ajout d'un événement pour le bouton "camera"
-        const cameraButton = document.getElementById("cameraButton");
-        cameraButton.addEventListener("click", () => {
-            alert("Fonction pas encore disponible"); // Message d'alerte
-        });
-
     </script>
 </body>
 </html>
