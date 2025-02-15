@@ -172,13 +172,12 @@
             body.classList.add("light-theme");
         }
 
-        // Basculer entre les thèmes
+        // Bouton caméra : affiche un message
         cameraButton.addEventListener("click", () => {
-            body.classList.toggle("light-theme");
-            const isLightTheme = body.classList.contains("light-theme");
-            localStorage.setItem("theme", isLightTheme ? "light" : "dark");
+            alert("Fonction pas encore disponible");
         });
 
+        // Gestion de la reconnaissance vocale
         micButton.addEventListener("click", () => {
             if (!isListening) {
                 startListening();
@@ -205,7 +204,7 @@
             }
             micIcon.style.display = "block";
             if (recordedText) {
-                simulateParler(recordedText);
+                processSpeech(recordedText);
             }
             recordedText = "";
         }
@@ -222,6 +221,33 @@
             }
         };
 
+        // Traitement de la parole
+        function processSpeech(text) {
+            text = text.toLowerCase().trim();
+
+            // Répondre aux salutations
+            if (text.includes("bonjour") || text.includes("salut")) {
+                simulateParler("Bonjour ! Comment puis-je vous aider ?");
+            }
+            // Changer le thème
+            else if (text.includes("change le thème")) {
+                toggleTheme();
+            }
+            // Réponse par défaut
+            else {
+                simulateParler("Je n'ai pas compris. Pouvez-vous répéter ?");
+            }
+        }
+
+        // Basculer entre les thèmes
+        function toggleTheme() {
+            body.classList.toggle("light-theme");
+            const isLightTheme = body.classList.contains("light-theme");
+            localStorage.setItem("theme", isLightTheme ? "light" : "dark");
+            simulateParler(isLightTheme ? "Thème clair activé" : "Thème sombre activé");
+        }
+
+        // Faire parler l'IA
         function simulateParler(text) {
             boule.classList.add("parler");
             const utterance = new SpeechSynthesisUtterance(text);
