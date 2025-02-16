@@ -247,7 +247,7 @@
             simulateParler(isLightTheme ? "Thème clair activé" : "Thème sombre activé");
         }
 
-        // Faire parler l'IA
+        // Faire parler l'IA avec une voix masculine
         function simulateParler(text) {
             // Annuler toute synthèse vocale en cours
             if (window.speechSynthesis.speaking) {
@@ -257,6 +257,15 @@
             boule.classList.add("parler");
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.lang = "fr-FR";
+
+            // Sélectionner une voix masculine
+            const voices = window.speechSynthesis.getVoices();
+            const maleVoice = voices.find(voice => voice.lang === "fr-FR" && voice.name.toLowerCase().includes("homme"));
+
+            if (maleVoice) {
+                utterance.voice = maleVoice;
+            }
+
             utterance.onstart = () => {
                 console.log("L'IA commence à parler");
                 recordedText = ""; // Effacer le texte enregistré
@@ -276,6 +285,12 @@
             }
             window.speechSynthesis.speak(utterance);
         }
+
+        // Charger les voix disponibles après que la page a été chargée
+        window.speechSynthesis.onvoiceschanged = () => {
+            console.log("Voix disponibles chargées");
+        };
     </script>
 </body>
 </html>
+                
