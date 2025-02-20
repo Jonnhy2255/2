@@ -37,14 +37,18 @@
             display: flex;
             justify-content: center;
             margin: 15px 0;
+            background: url('https://i.imgur.com/3QZQZQZ.png') no-repeat center center; /* Fond de table de casino */
+            background-size: cover;
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid #d4af37;
         }
         .dice {
-            width: 90px;
-            height: 90px;
+            width: 80px;
+            height: 80px;
             margin: 0 10px;
-            filter: drop-shadow(0 0 10px #d4af37); /* Glow doré autour des dés */
-            border-radius: 15px;
-            background-color: #ff4d4d; /* Rouge vif pour plus de contraste */
+            background-color: rgba(255, 255, 255, 0.1); /* Fond semi-transparent pour les dés */
+            border-radius: 10px;
             padding: 10px;
         }
         .bet-options {
@@ -179,8 +183,8 @@
 
         <h1>Under and Over 7</h1>
         <div class="dice-container">
-            <img id="dice1" src="https://upload.wikimedia.org/wikipedia/commons/3/34/Dice-red-1.svg" alt="Dé 1" class="dice">
-            <img id="dice2" src="https://upload.wikimedia.org/wikipedia/commons/3/34/Dice-red-1.svg" alt="Dé 2" class="dice">
+            <img id="dice1" src="https://upload.wikimedia.org/wikipedia/commons/1/1b/Dice-1-b.svg" alt="Dé 1" class="dice">
+            <img id="dice2" src="https://upload.wikimedia.org/wikipedia/commons/1/1b/Dice-1-b.svg" alt="Dé 2" class="dice">
         </div>
 
         <div class="bet-options">
@@ -229,7 +233,6 @@
     </div>
 
     <audio id="diceSound" src="https://www.myinstants.com/media/sounds/dice-roll.mp3" preload="auto"></audio>
-</body>
     <script>
     let selectedOption = null;
 
