@@ -26,7 +26,6 @@
             box-shadow: 0 0 15px rgba(0, 0, 0, 0.8);
             width: 90%;
             max-width: 400px;
-            margin: auto;
             position: relative;
         }
         h1 {
@@ -40,14 +39,13 @@
             margin: 15px 0;
         }
         .dice {
-            width: 80px;
-            height: 80px;
+            width: 90px;
+            height: 90px;
             margin: 0 10px;
-            animation: rotateDice 1s ease-in-out;
-        }
-        @keyframes rotateDice {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
+            filter: drop-shadow(0 0 10px #d4af37); /* Glow doré autour des dés */
+            border-radius: 15px;
+            background-color: #ff4d4d; /* Rouge vif pour plus de contraste */
+            padding: 10px;
         }
         .bet-options {
             display: flex;
@@ -119,8 +117,6 @@
             font-size: 20px;
             font-weight: bold;
         }
-
-        /* Pop-up moderne */
         .modal {
             display: none;
             position: fixed;
@@ -154,11 +150,7 @@
             font-size: 24px;
             cursor: pointer;
         }
-        .close-modal:hover {
-            color: #d4af37;
-        }
-
-        /* Bouton "Comment ça marche" */
+        .close-modal:hover { color: #d4af37; }
         .how-to-play {
             position: absolute;
             top: 20px;
@@ -176,22 +168,19 @@
             font-size: 20px;
             transition: background-color 0.3s ease;
         }
-        .how-to-play:hover {
-            background-color: #c0a037;
-        }
+        .how-to-play:hover { background-color: #c0a037; }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- Bouton "Comment ça marche" -->
         <button class="how-to-play" onclick="openHowToPlay()">
             <i class="fas fa-question"></i>
         </button>
 
         <h1>Under and Over 7</h1>
         <div class="dice-container">
-            <img id="dice1" src="https://upload.wikimedia.org/wikipedia/commons/1/1b/Dice-1-b.svg" alt="Dé 1" class="dice">
-            <img id="dice2" src="https://upload.wikimedia.org/wikipedia/commons/1/1b/Dice-1-b.svg" alt="Dé 2" class="dice">
+            <img id="dice1" src="https://upload.wikimedia.org/wikipedia/commons/3/34/Dice-red-1.svg" alt="Dé 1" class="dice">
+            <img id="dice2" src="https://upload.wikimedia.org/wikipedia/commons/3/34/Dice-red-1.svg" alt="Dé 2" class="dice">
         </div>
 
         <div class="bet-options">
@@ -240,69 +229,97 @@
     </div>
 
     <audio id="diceSound" src="https://www.myinstants.com/media/sounds/dice-roll.mp3" preload="auto"></audio>
-
+</body>
     <script>
-        let selectedOption = null;
+    let selectedOption = null;
 
-        function selectOption(optionId) {
-            document.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
-            document.getElementById(optionId).classList.add('selected');
-            selectedOption = optionId;
+    function selectOption(optionId) {
+        document.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
+        document.getElementById(optionId).classList.add('selected');
+        selectedOption = optionId;
+    }
+
+    function setBet(action) {
+        const input = document.getElementById('betAmount');
+        let currentBet = parseInt(input.value) || 0;
+        switch (action) {
+            case 'min': currentBet = 1; break;
+            case 'x2': currentBet = Math.min(currentBet * 2, 10000); break;
+            case 'half': currentBet = Math.floor(currentBet / 2); break;
+            case 'max': currentBet = 10000; break;
         }
+        input.value = currentBet;
+    }
 
-        function setBet(action) {
-            const input = document.getElementById('betAmount');
-            let currentBet = parseInt(input.value) || 0;
-            switch (action) {
-                case 'min': currentBet = 1; break;
-                case 'x2': currentBet = Math.min(currentBet * 2, 10000); break;
-                case 'half': currentBet = Math.floor(currentBet / 2); break;
-                case 'max': currentBet = 10000; break;
+    function rollDice() {
+        const bet = parseInt(document.getElementById('betAmount').value);
+        if (!selectedOption) return alert("Sélectionnez une option !");
+        if (!bet || bet <= 0 || bet > 10000) return alert("Entrez un montant valide (1 - 10.000)");
+
+        const diceSound = document.getElementById('diceSound');
+        diceSound.currentTime = 0;
+        diceSound.play();
+
+        // Animation des points aléatoires pendant 1.2s
+        let animationInterval = setInterval(() => {
+            const random1 = Math.floor(Math.random() * 6) + 1;
+            const random2 = Math.floor(Math.random() * 6) + 1;
+            updateDiceImage(random1, 'dice1');
+            updateDiceImage(random2, 'dice2');
+        }, 100);
+
+        setTimeout(() => {
+            clearInterval(animationInterval); // Stoppe l'animation après 1.2s
+
+            const dice1 = Math.floor(Math.random() * 6) + 1;
+            const dice2 = Math.floor(Math.random() * 6) + 1;
+            const total = dice1 + dice2;
+
+            updateDiceImage(dice1, 'dice1');
+            updateDiceImage(dice2, 'dice2');
+
+            const resultText = document.getElementById('modalResult');
+            if ((selectedOption === 'over7' && total > 7) ||
+                (selectedOption === 'equal7' && total === 7) ||
+                (selectedOption === 'under7' && total < 7)) {
+                const gain = bet * (selectedOption === 'equal7' ? 5.8 : 2.3);
+                resultText.innerHTML = `🎉 Gagné ! Résultat : ${total} | Gain : ${gain.toFixed(2)}`;
+                resultText.style.color = "#28a745";
+            } else {
+                resultText.innerHTML = `😢 Perdu ! Résultat : ${total}`;
+                resultText.style.color = "#dc3545";
             }
-            input.value = currentBet;
-        }
 
-        function rollDice() {
-            const bet = parseInt(document.getElementById('betAmount').value);
-            if (!selectedOption) return alert("Sélectionnez une option !");
-            if (!bet || bet <= 0 || bet > 10000) return alert("Entrez un montant valide (1 - 10.000)");
-
-            document.getElementById('diceSound').play();
-
+            // Délai de 0.5s avant l'affichage de la pop-up
             setTimeout(() => {
-                const dice1 = Math.floor(Math.random() * 6) + 1;
-                const dice2 = Math.floor(Math.random() * 6) + 1;
-                const total = dice1 + dice2;
-
-                document.getElementById('dice1').src = `https://upload.wikimedia.org/wikipedia/commons/${dice1 === 1 ? "1/1b/Dice-1-b" : dice1 === 2 ? "5/5f/Dice-2-b" : dice1 === 3 ? "b/b1/Dice-3-b" : dice1 === 4 ? "f/fd/Dice-4-b" : dice1 === 5 ? "0/08/Dice-5-b" : "2/26/Dice-6-b"}.svg`;
-                document.getElementById('dice2').src = `https://upload.wikimedia.org/wikipedia/commons/${dice2 === 1 ? "1/1b/Dice-1-b" : dice2 === 2 ? "5/5f/Dice-2-b" : dice2 === 3 ? "b/b1/Dice-3-b" : dice2 === 4 ? "f/fd/Dice-4-b" : dice2 === 5 ? "0/08/Dice-5-b" : "2/26/Dice-6-b"}.svg`;
-
-                const resultText = document.getElementById('modalResult');
-                if ((selectedOption === 'over7' && total > 7) ||
-                    (selectedOption === 'equal7' && total === 7) ||
-                    (selectedOption === 'under7' && total < 7)) {
-                    const gain = bet * (selectedOption === 'equal7' ? 5.8 : 2.3);
-                    resultText.innerHTML = `🎉 Gagné ! Résultat : ${total} | Gain : ${gain.toFixed(2)}`;
-                    resultText.style.color = "#28a745";
-                } else {
-                    resultText.innerHTML = `😢 Perdu ! Résultat : ${total}`;
-                    resultText.style.color = "#dc3545";
-                }
                 openModal('resultModal');
-            }, 1500);
-        }
+            }, 500);
+        }, 1200);
+    }
 
-        function openModal(modalId) {
-            document.getElementById(modalId).style.display = 'flex';
-        }
+    function updateDiceImage(value, diceId) {
+        const srcMap = {
+            1: "1/1b/Dice-1-b",
+            2: "5/5f/Dice-2-b",
+            3: "b/b1/Dice-3-b",
+            4: "f/fd/Dice-4-b",
+            5: "0/08/Dice-5-b",
+            6: "2/26/Dice-6-b"
+        };
+        document.getElementById(diceId).src = `https://upload.wikimedia.org/wikipedia/commons/${srcMap[value]}.svg`;
+    }
 
-        function closeModal() {
-            document.querySelectorAll('.modal').forEach(modal => modal.style.display = 'none');
-        }
+    function openModal(modalId) {
+        document.getElementById(modalId).style.display = 'flex';
+    }
 
-        function openHowToPlay() {
-            openModal('howToPlayModal');
-        }
-    </script>
+    function closeModal() {
+        document.querySelectorAll('.modal').forEach(modal => modal.style.display = 'none');
+    }
+
+    function openHowToPlay() {
+        openModal('howToPlayModal');
+    }
+</script>
 </body>
 </html>
