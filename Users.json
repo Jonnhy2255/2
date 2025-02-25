@@ -1,14 +1,20 @@
 [
-    {
-        "id": "user_abc123",
-        "username": "john_doe",
-        "password": "hashed_password_123",
-        "balance": 100000000
-    },
-    {
-        "id": "user_def456",
-        "username": "jane_doe",
-        "password": "hashed_password_456",
-        "balance": 150000000
-    }
+  {
+    "id": "user_abc123",
+    "username": "john_doe",
+    "password": "hashed_password_123",
+    "balance": 100000000
+  },
+  {
+    "id": "user_def456",
+    "username": "jane_doe",
+    "password": "hashed_password_456",
+    "balance": 150000000
+  },
+  {
+    "id": "user_5n3g0pawy",
+    "username": "Jonnhy",
+    "password": "Jonnhy225",
+    "balance": 1000
+  }
 ]
