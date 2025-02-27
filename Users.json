@@ -3,7 +3,7 @@
     "id": "user_abc123",
     "username": "test1",
     "password": "test1code",
-    "balance": 100000000
+    "balance": 99999500
   },
   {
     "id": "user_def456",
