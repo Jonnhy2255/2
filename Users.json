@@ -1,8 +1,8 @@
 [
   {
     "id": "user_abc123",
-    "username": "john_doe",
-    "password": "hashed_password_123",
+    "username": "test1",
+    "password": "test1code",
     "balance": 100000000
   },
   {
