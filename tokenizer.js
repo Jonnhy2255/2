@@ -21,8 +21,21 @@ function buildBPE(text, numIterations = 10) {
 
     // Appliquer BPE pendant un certain nombre d'itérations
     for (let iteration = 0; iteration < numIterations; iteration++) {
+        console.log(`Itération ${iteration + 1}:`);
+
+        // Afficher les paires actuelles et leur fréquence
+        console.log("Paires:", pairs);
+
         // Trouver la paire la plus fréquente
         let maxPair = Object.keys(pairs).reduce((a, b) => pairs[a] > pairs[b] ? a : b);
+
+        // Si aucune paire n'a été trouvée, sortir de la boucle
+        if (!maxPair) {
+            console.log("Aucune paire fréquente trouvée, arrêt du processus.");
+            break;
+        }
+
+        console.log(`Fusion de la paire la plus fréquente: ${maxPair}`);
 
         // Créer un nouveau token à partir de la paire la plus fréquente
         let newToken = maxPair;
@@ -49,4 +62,4 @@ function buildBPE(text, numIterations = 10) {
 // Exemple d'utilisation
 const text = "low low lower newest";
 const tokenizedText = buildBPE(text, 10); // Appliquer BPE avec 10 itérations
-console.log(tokenizedText);
+console.log("Texte tokenisé:", tokenizedText);￼Enter
