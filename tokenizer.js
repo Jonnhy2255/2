@@ -1,6 +1,7 @@
-console.log("tokenizer.js chargé");
+// tokenizer.js
+console.log("tokenizer.js (module) chargé");
 
-function buildBPE(text, numIterations = 10) {
+export function buildBPE(text, numIterations = 10) {
     console.log("Texte reçu pour tokenisation :", text);
     let words = text.split(/\s+/);
     let pairs = {};
@@ -47,8 +48,3 @@ function buildBPE(text, numIterations = 10) {
     console.log("Texte final tokenisé :", result);
     return result;
 }
-
-// Exemple automatique
-const text = "low low lower newest";
-const tokenizedText = buildBPE(text, 10);
-console.log("Résultat final :", tokenizedText);
