@@ -1,129 +1,32 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Test Tokenizer BPE</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            background-color: #f4f4f4;
-        }
-        h1 {
-            color: #333;
-        }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: white;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-        textarea {
-            width: 100%;
-            height: 150px;
-            padding: 10px;
-            font-size: 16px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            box-sizing: border-box;
-        }
-        button {
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            font-size: 16px;
-            margin-top: 10px;
-            cursor: pointer;
-            border-radius: 4px;
-        }
-        button:hover {
-            background-color: #45a049;
-        }
-        .result {
-            margin-top: 20px;
-            padding: 10px;
-            background-color: #f9f9f9;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            white-space: pre-wrap;
-        }
-        .log {
-            margin-top: 20px;
-            padding: 10px;
-            background-color: #e9e9e9;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            white-space: pre-wrap;
-            font-size: 14px;
-            max-height: 200px;
-            overflow-y: auto;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>Test Tokenizer BPE (module)</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    textarea { width: 100%; height: 80px; }
+    pre { background: #f0f0f0; padding: 10px; white-space: pre-wrap; }
+  </style>
 </head>
 <body>
+  <h1>Test Tokenizer BPE</h1>
+  <textarea id="inputText">j'ai deux enfants et trois femmes</textarea><br><br>
+  <button id="run">Tokeniser</button>
 
-<div class="container">
-    <h1>Test Tokenizer BPE</h1>
-    <p>Entrez une phrase ci-dessous, puis appuyez sur "Tokeniser" pour voir le résultat avec Byte Pair Encoding (BPE).</p>
-    
-    <!-- Champ pour entrer une phrase -->
-    <textarea id="inputText" placeholder="Entrez votre phrase ici..."></textarea>
-    
-    <!-- Bouton pour lancer le traitement -->
-    <button onclick="tokenizeText()">Tokeniser</button>
-    
-    <!-- Résultat affiché ici -->
-    <div class="result" id="resultText"></div>
+  <h3>Résultat :</h3>
+  <pre id="output">...</pre>
 
-    <!-- Log affiché ici -->
-    <div class="log" id="logText">Logs ici...</div>
-</div>
+  <script type="module">
+    import { buildBPE } from './tokenizer.js';
 
-<script src="https://jonnhy2255.github.io/2/tokenizer.js"></script>
-<script>
-    // Fonction pour ajouter des logs dans la page
-    function logMessage(message) {
-        const logDiv = document.getElementById('logText');
-        logDiv.textContent += message + "\n";  // Ajouter le message dans le log
-        logDiv.scrollTop = logDiv.scrollHeight;  // Faire défiler automatiquement vers le bas
-    }
+    console.log("HTML chargé avec module.");
 
-    // Fonction pour appliquer le tokenizer BPE et afficher le résultat
-    function tokenizeText() {
-        const inputText = document.getElementById('inputText').value; // Récupérer le texte
-        if (!inputText.trim()) {
-            alert("Veuillez entrer une phrase avant de tokeniser.");
-            return;
-        }
-
-        // Afficher un message de log pour commencer le processus
-        logMessage("Démarrage du processus de tokenisation...");
-
-        try {
-            // Appliquer la fonction BPE sur le texte
-            const tokenizedText = buildBPE(inputText, 10); // Appliquer BPE avec 10 itérations
-
-            // Afficher le texte tokenisé dans le div "resultText"
-            document.getElementById('resultText').textContent = tokenizedText;
-
-            // Log final
-            logMessage("Tokenisation terminée.");
-            logMessage("Texte tokenisé : " + tokenizedText);
-        } catch (error) {
-            logMessage("Erreur lors du traitement : " + error.message);
-        }
-    }
-
-    // Vérifier si le script de tokenizer est chargé correctement
-    if (typeof buildBPE === "function") {
-        logMessage("La bibliothèque de tokenizer est correctement chargée.");
-    } else {
-        logMessage("Erreur : la bibliothèque de tokenizer n'a pas été chargée.");
-    }
-</script>
-
+    document.getElementById("run").addEventListener("click", () => {
+      const input = document.getElementById("inputText").value;
+      const result = buildBPE(input, 10);
+      document.getElementById("output").textContent = result;
+    });
+  </script>
 </body>
-</html>
+</html>￼Enter
