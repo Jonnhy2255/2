@@ -1,9 +1,10 @@
+console.log("tokenizer.js chargé");
+
 function buildBPE(text, numIterations = 10) {
-    // Séparer le texte en mots
-    let words = text.split(/\s+/);  // On sépare par les espaces blancs
+    console.log("Texte reçu pour tokenisation :", text);
+    let words = text.split(/\s+/);
     let pairs = {};
 
-    // Fonction pour récupérer toutes les paires dans les mots
     function getPairs(words) {
         let pairFreqs = {};
         words.forEach(word => {
@@ -16,50 +17,38 @@ function buildBPE(text, numIterations = 10) {
         return pairFreqs;
     }
 
-    // Initialiser les paires de caractères
     pairs = getPairs(words);
 
-    // Appliquer BPE pendant un certain nombre d'itérations
     for (let iteration = 0; iteration < numIterations; iteration++) {
         console.log(`Itération ${iteration + 1}:`);
+        console.log("Paires actuelles:", pairs);
 
-        // Afficher les paires actuelles et leur fréquence
-        console.log("Paires:", pairs);
+        let maxPair = Object.keys(pairs).reduce((a, b) => pairs[a] > pairs[b] ? a : b, null);
 
-        // Trouver la paire la plus fréquente
-        let maxPair = Object.keys(pairs).reduce((a, b) => pairs[a] > pairs[b] ? a : b);
-
-        // Si aucune paire n'a été trouvée, sortir de la boucle
-        if (!maxPair) {
+        if (!maxPair || pairs[maxPair] <= 1) {
             console.log("Aucune paire fréquente trouvée, arrêt du processus.");
             break;
         }
 
         console.log(`Fusion de la paire la plus fréquente: ${maxPair}`);
 
-        // Créer un nouveau token à partir de la paire la plus fréquente
-        let newToken = maxPair;
         let newWords = [];
 
-        // Remplacer la paire la plus fréquente par un nouveau token dans tous les mots
         words.forEach(word => {
-            // Remplacer toutes les occurrences de la paire par le nouveau token
-            const newWord = word.replace(new RegExp(maxPair, 'g'), newToken);
+            const newWord = word.replace(new RegExp(maxPair, 'g'), maxPair);
             newWords.push(newWord);
         });
 
-        // Mettre à jour les mots avec les nouvelles paires fusionnées
         words = newWords;
-
-        // Recalculer les paires après cette itération
         pairs = getPairs(words);
     }
 
-    // Retourner le texte transformé avec les sous-mots fusionnés
-    return words.join(' ');
+    const result = words.join(' ');
+    console.log("Texte final tokenisé :", result);
+    return result;
 }
 
-// Exemple d'utilisation
+// Exemple automatique
 const text = "low low lower newest";
-const tokenizedText = buildBPE(text, 10); // Appliquer BPE avec 10 itérations
-console.log("Texte tokenisé:", tokenizedText);￼Enter
+const tokenizedText = buildBPE(text, 10);
+console.log("Résultat final :", tokenizedText);
