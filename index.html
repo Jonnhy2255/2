@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>BetXchange</title>
+    <title>ChatXchange</title>
     <link rel="manifest" href="manifest.json">
     
     <!-- Styles -->
@@ -49,14 +49,6 @@
             --warning-color-dark: #D97706;
             --info-color: #3B82F6;
             --info-color-dark: #2563EB;
-            
-            /* Chat bubble shape variables */
-            --chat-bubble-border-radius: 18px;
-            --chat-bubble-border-radius-sent-br: 4px;
-            --chat-bubble-border-radius-received-bl: 4px;
-            
-            /* Low memory mode variables */
-            --low-memory: 0; /* 0 = normal, 1 = low memory mode */
         }
         
         .dark {
@@ -445,9 +437,6 @@
             transition: all 0.2s;
             position: relative;
             border-bottom: 1px solid var(--border-color);
-            transform: translateX(0);
-            left: 0;
-            touch-action: pan-x;
         }
         
         .conversation-item:active {
@@ -504,7 +493,6 @@
             height: 100%;
             border-radius: 50%;
             object-fit: cover;
-            pointer-events: none; /* Prevent default browser preview */
         }
         
         .conversation-status {
@@ -520,6 +508,20 @@
         
         .conversation-status.online {
             background-color: var(--success-color);
+            box-shadow: 0 0 0 2px var(--card-bg), 0 0 0 4px rgba(76, 175, 80, 0.3);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.4);
+            }
+            70% {
+                box-shadow: 0 0 0 6px rgba(76, 175, 80, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(76, 175, 80, 0);
+            }
         }
         
         .conversation-content {
@@ -753,7 +755,7 @@
         .message-bubble {
             max-width: 80%;
             padding: 12px 16px;
-            border-radius: var(--chat-bubble-border-radius);
+            border-radius: 18px;
             margin-bottom: 2px;
             position: relative;
             animation: message-in 0.3s ease-out;
@@ -781,13 +783,13 @@
         .message-sent {
             background: var(--accent-gradient);
             color: white;
-            border-bottom-right-radius: var(--chat-bubble-border-radius-sent-br);
+            border-bottom-right-radius: 4px;
         }
         
         .message-received {
             background-color: var(--card-bg);
             color: var(--text-color);
-            border-bottom-left-radius: var(--chat-bubble-border-radius-received-bl);
+            border-bottom-left-radius: 4px;
             border: 1px solid var(--border-color);
         }
         
@@ -981,39 +983,99 @@
             color: var(--accent-color);
         }
         
+        /* New Android-style emoji picker */
         .emoji-picker {
-            position: absolute;
-            bottom: 70px;
-            left: 16px;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
             background-color: var(--card-bg);
-            border-radius: 16px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            padding: 8px;
-            display: grid;
-            grid-template-columns: repeat(6, 1fr);
-            gap: 8px;
-            z-index: 100;
-            animation: scale-in 0.2s ease-out;
-            max-width: calc(100% - 32px);
-            max-height: 200px;
+            z-index: 1000;
+            height: 240px;
+            border-top: 1px solid var(--border-color);
+            animation: slide-up-emoji 0.3s ease-out;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .emoji-picker-header {
+            display: flex;
+            padding: 8px 16px;
+            border-bottom: 1px solid var(--border-color);
+            background-color: #f5f5f5;
+        }
+        
+        .dark .emoji-picker-header {
+            background-color: #2a2a2a;
+        }
+        
+        .emoji-category-tab {
+            padding: 8px 12px;
+            font-size: 14px;
+            color: var(--secondary-text);
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+        
+        .emoji-category-tab.active {
+            color: var(--accent-color);
+            border-bottom-color: var(--accent-color);
+        }
+        
+        .emoji-picker-content {
+            flex: 1;
             overflow-y: auto;
+            padding: 8px;
+        }
+        
+        .emoji-category {
+            margin-bottom: 16px;
+        }
+        
+        .emoji-category-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--secondary-text);
+            padding: 0 8px;
+        }
+        
+        .emoji-grid {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 8px;
         }
         
         .emoji-item {
-            font-size: 20px;
-            height: 36px;
-            width: 36px;
+            font-size: 24px;
+            height: 40px;
+            width: 40px;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            border-radius: 8px;
+            border-radius: 4px;
             transition: all 0.2s;
         }
         
         .emoji-item:active {
             background-color: var(--secondary-bg);
             transform: scale(1.1);
+        }
+        
+        @keyframes slide-up-emoji {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+        
+        @keyframes slide-down-emoji {
+            from { transform: translateY(0); }
+            to { transform: translateY(100%); }
+        }
+        
+        .emoji-picker.closing {
+            animation: slide-down-emoji 0.3s forwards;
         }
         
         .message-input-container {
@@ -1237,7 +1299,6 @@
             height: 100%;
             border-radius: 50%;
             object-fit: cover;
-            pointer-events: none;
         }
         
         .user-info {
@@ -1278,6 +1339,20 @@
         
         .status-dot.online {
             background-color: var(--success-color);
+            box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+            animation: pulseDot 2s infinite;
+        }
+        
+        @keyframes pulseDot {
+            0% {
+                box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.4);
+            }
+            70% {
+                box-shadow: 0 0 0 4px rgba(76, 175, 80, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(76, 175, 80, 0);
+            }
         }
         
         .user-bio {
@@ -1350,7 +1425,6 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            pointer-events: none;
         }
         
         .profile-card {
@@ -1552,14 +1626,15 @@
             100% { transform: rotate(360deg); }
         }
         
-        /* Banner notifications */
+        /* Banner notifications - IMPROVED */
         .banner-notification {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
+            max-width: 500px;
+            margin: 0 auto;
             padding: 16px;
-            background-color: #333;
             color: white;
             z-index: 2000;
             display: flex;
@@ -1568,6 +1643,7 @@
             transform: translateY(-100%);
             animation: slide-down-banner 0.3s forwards;
             box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            border-radius: 0 0 12px 12px;
         }
         
         .banner-notification.success {
@@ -1608,10 +1684,19 @@
         
         .banner-icon {
             margin-right: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            min-width: 28px;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
         }
         
         .banner-message {
             font-weight: 500;
+            flex: 1;
         }
         
         .banner-close {
@@ -1622,10 +1707,19 @@
             opacity: 0.8;
             transition: opacity 0.3s;
             padding: 4px;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            margin-left: 10px;
         }
         
         .banner-close:hover {
             opacity: 1;
+            background-color: rgba(255, 255, 255, 0.2);
         }
         
         .toast {
@@ -2149,163 +2243,74 @@
             background: rgba(255, 255, 255, 0.3);
         }
         
-        /* Chat bubble shapes */
-        .chat-bubble-shape-option {
-            width: 48px;
-            height: 32px;
-            border-radius: 8px;
-            border: 2px solid var(--border-color);
-            cursor: pointer;
-            transition: all 0.2s;
+        /* Message sending animation */
+        .message-sending {
+            opacity: 0.7;
             position: relative;
-            overflow: hidden;
         }
         
-        .chat-bubble-shape-option.active {
-            border-color: var(--accent-color);
-            transform: scale(1.1);
-        }
-        
-        .chat-bubble-shape-option::before {
+        .message-sending::after {
             content: '';
             position: absolute;
-            top: 4px;
+            bottom: 4px;
             right: 4px;
-            width: 20px;
-            height: 16px;
-            background: var(--accent-gradient);
-            border-radius: var(--shape-radius);
-        }
-        
-        .chat-bubble-shape-rounded::before {
-            border-radius: 12px;
-        }
-        
-        .chat-bubble-shape-modern::before {
-            border-radius: 10px 10px 2px 10px;
-        }
-        
-        .chat-bubble-shape-square::before {
-            border-radius: 4px;
-        }
-        
-        /* Message sending state */
-        .sending-indicator {
-            display: inline-flex;
-            margin-left: 4px;
-            align-items: center;
-        }
-        
-        .sending-dots {
-            display: flex;
-            align-items: center;
-        }
-        
-        .sending-dot {
-            width: 4px;
-            height: 4px;
+            width: 12px;
+            height: 12px;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-top-color: transparent;
             border-radius: 50%;
-            background-color: currentColor;
-            margin: 0 1px;
-            opacity: 0.7;
+            animation: spinner 0.8s linear infinite;
         }
         
-        .sending-dot:nth-child(1) {
-            animation: sending-dot 1s infinite 0s;
+        @keyframes spinner {
+            to { transform: rotate(360deg); }
         }
         
-        .sending-dot:nth-child(2) {
-            animation: sending-dot 1s infinite 0.2s;
+        /* Last seen indicator - enhanced */
+        .last-seen-indicator {
+            font-size: 12px;
+            color: var(--secondary-text);
+            margin-top: 4px;
         }
         
-        .sending-dot:nth-child(3) {
-            animation: sending-dot 1s infinite 0.4s;
+        .user-last-active {
+            font-style: italic;
+            opacity: 0.9;
         }
         
-        @keyframes sending-dot {
-            0%, 60%, 100% {
-                transform: translateY(0);
+        /* Fix for the chat area on mobile keyboards */
+        @media (max-height: 600px) {
+            .chat-input-container {
+                position: sticky;
+                bottom: 0;
             }
-            30% {
-                transform: translateY(-4px);
+            
+            .chat-messages {
+                padding-bottom: 16px;
             }
         }
         
-        /* Fallback for stuck loading screen */
-        .auth-fallback-btn {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 10px 20px;
-            background: var(--accent-gradient);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-weight: 500;
-            font-size: 14px;
-            cursor: pointer;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-            z-index: 9999;
+        /* Make sure chat area adjusts when keyboard appears */
+        body.keyboard-open .chat-messages {
+            padding-bottom: 16px;
+        }
+        
+        body.keyboard-open .chat-input-container {
+            position: sticky;
+            bottom: 0;
+        }
+        
+        /* Toggle emoji keyboard icon */
+        .keyboard-icon {
             display: none;
         }
         
-        /* Error message for loading screen */
-        .loading-error {
-            color: var(--error-color);
-            text-align: center;
-            margin-top: 20px;
-            font-size: 14px;
-            max-width: 300px;
+        .emoji-open .emoji-icon {
+            display: none;
         }
         
-        /* Low memory mode styles */
-        .low-memory-badge {
-            position: fixed;
-            bottom: 70px;
-            left: 10px;
-            background-color: rgba(0, 0, 0, 0.7);
-            color: white;
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 10px;
-            z-index: 90;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-        
-        .low-memory-badge svg {
-            width: 12px;
-            height: 12px;
-        }
-        
-        /* Custom styles for low-memory devices */
-        @media (max-memory: 1gb), (max-width: 360px) {
-            :root {
-                --low-memory: 1;
-            }
-            
-            /* Simplified animations for low-memory devices */
-            @keyframes message-in-low-memory {
-                from { opacity: 0; }
-                to { opacity: 1; }
-            }
-            
-            .message-bubble {
-                animation: message-in-low-memory 0.2s ease-out;
-            }
-            
-            /* Reduce image quality */
-            .message-image {
-                max-width: 200px;
-                max-height: 150px;
-            }
-            
-            /* Disable some animations */
-            .auth-logo, .auth-form {
-                animation: none;
-            }
+        .emoji-open .keyboard-icon {
+            display: block;
         }
     </style>
 </head>
@@ -2319,19 +2324,6 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
     
     <script>
-        // Register service worker
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js')
-                    .then(registration => {
-                        console.log('ServiceWorker registered with scope: ', registration.scope);
-                    })
-                    .catch(err => {
-                        console.log('ServiceWorker registration failed: ', err);
-                    });
-            });
-        }
-        
         // Initialize Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyAHkI_ZfUX0jheLQyYy49iYLh1LUwxw26Y",
@@ -2343,26 +2335,22 @@
             measurementId: "G-4HVY16QT8M"
         };
         
-        // Initialize Firebase with error handling
-        let auth, db, storage;
-        try {
-            firebase.initializeApp(firebaseConfig);
-            auth = firebase.auth();
-            db = firebase.firestore();
-            storage = firebase.storage();
-        } catch (error) {
-            console.error("Firebase initialization error:", error);
-            // Show fallback UI on error
-            document.getElementById('app').innerHTML = `
-                <div class="loading" style="height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; background-color: var(--bg-color);">
-                    <div style="margin-bottom: 40px; text-align: center;">
-                        <h1 style="font-size: 32px; margin-bottom: 10px; background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">BetXchange</h1>
-                        <p style="color: var(--secondary-text);">Erreur de connexion</p>
-                    </div>
-                    <div class="loading-error">Une erreur s'est produite lors de la connexion à Firebase. Veuillez réessayer.</div>
-                    <button onclick="window.location.reload()" style="margin-top: 20px; padding: 10px 20px; background: var(--accent-gradient); color: white; border: none; border-radius: 8px;">Réessayer</button>
-                </div>
-            `;
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        const storage = firebase.storage();
+        
+        // Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(registration => {
+                        console.log('Service Worker registered with scope:', registration.scope);
+                    })
+                    .catch(error => {
+                        console.error('Service Worker registration failed:', error);
+                    });
+            });
         }
         
         // Check for dark mode
@@ -2390,59 +2378,11 @@
                 }
             }
         });
-
-        // Detect low memory devices
-        function detectLowMemoryDevice() {
-            // Try to use navigator.deviceMemory if available
-            if (navigator.deviceMemory !== undefined) {
-                return navigator.deviceMemory <= 1;
-            }
-            
-            // Fallback to screen width as a heuristic
-            return window.innerWidth < 400;
-        }
-        
-        // Auto-cleanup messages and images older than 5 days
-        async function cleanupOldMessages() {
-            try {
-                // Calculate date 5 days ago
-                const fiveDaysAgo = new Date();
-                fiveDaysAgo.setDate(fiveDaysAgo.getDate() - 5);
-                
-                // Get messages older than 5 days
-                const oldMessagesQuery = await db.collection('messages')
-                    .where('timestamp', '<', fiveDaysAgo)
-                    .get();
-                
-                if (!oldMessagesQuery.empty) {
-                    const batch = db.batch();
-                    
-                    oldMessagesQuery.forEach(doc => {
-                        const messageData = doc.data();
-                        
-                        // Delete message and its image (if it has one)
-                        // Skip profile images (they are in users collection)
-                        if (messageData.messageType === 'image' && messageData.image) {
-                            // We don't have direct storage access in this case
-                            // So we just delete the message document
-                        }
-                        batch.delete(doc.ref);
-                    });
-                    
-                    await batch.commit();
-                    console.log(`Cleaned up ${oldMessagesQuery.size} old messages`);
-                }
-            } catch (error) {
-                console.error("Error cleaning up old messages:", error);
-            }
-        }
         
         // Main application logic
         const app = {
             currentUser: null,
             currentScreen: 'loading', // loading, auth, main, chat
-            isAuthLoaded: false, // Track if auth has finished loading
-            authTimeoutId: null, // For fallback if auth takes too long
             currentTab: 'conversations', // conversations, users, profile, ai
             conversations: [],
             filteredConversations: [],
@@ -2454,7 +2394,6 @@
             isDarkMode: checkDarkMode(),
             accentColor: '#5D5CDE',
             accentGradient: 'var(--accent-gradient)',
-            chatBubbleShape: 'default', // default, rounded, modern, square
             notificationTimer: null,
             bannerNotificationTimer: null,
             selectedImage: null,
@@ -2480,35 +2419,21 @@
             emojiPickerVisible: false, // Track emoji picker visibility
             selectedEmojis: {}, // Track selected emojis for messages
             customImagePreview: null,
-            availableEmojis: ['👍', '❤️', '😂', '😮', '😢', '👏'], // Reduced to 6 emojis
+            availableEmojis: ['👍', '❤️', '😂', '😮', '😢', '👏'],
+            recentEmojis: [], // Track recently used emojis
             reactionPickerVisible: false,
             reactionPickerTargetId: null,
             totalUserCount: 0, // Track total user count
             maxUserLimit: 55, // Maximum number of users allowed
-            pendingMessages: new Map(), // Track messages being sent
-            isLowMemoryDevice: detectLowMemoryDevice(), // Flag for low memory devices
-            maxMessagesToLoad: 50, // Default max messages to load at once
-            messageCleanupInterval: null, // Interval for message cleanup
+            sendingMessages: new Set(), // Track sending messages for UI feedback
+            onlineStatusInterval: null, // Interval for updating online status
+            activeEmojiCategory: 'recent', // Track active emoji category
+            isKeyboardVisible: false, // Track if keyboard is visible
             
             // Initialize app
             init() {
-                // Apply low memory mode if needed
-                if (this.isLowMemoryDevice) {
-                    document.documentElement.style.setProperty('--low-memory', '1');
-                    this.maxMessagesToLoad = 30; // Load fewer messages on low-memory devices
-                    console.log("Low memory mode enabled");
-                }
-                
                 // Show loading state first
                 this.renderLoadingScreen();
-                
-                // Set a timeout to show fallback UI if auth takes too long
-                this.authTimeoutId = setTimeout(() => {
-                    if (!this.isAuthLoaded) {
-                        const fallbackBtn = document.querySelector('.auth-fallback-btn');
-                        if (fallbackBtn) fallbackBtn.style.display = 'block';
-                    }
-                }, 10000); // 10 seconds timeout
                 
                 // Then proceed with auth check
                 this.setupAuthListener();
@@ -2543,23 +2468,96 @@
                     }
                 });
                 
-                // Prevent default behavior on avatar clicks
-                document.addEventListener('click', (e) => {
-                    if (e.target.closest('.conversation-avatar') || e.target.closest('.user-avatar') || 
-                        e.target.closest('.profile-avatar')) {
-                        e.preventDefault();
-                        
-                        // Find the image source
-                        const avatarContainer = e.target.closest('.conversation-avatar') || 
-                                              e.target.closest('.user-avatar') || 
-                                              e.target.closest('.profile-avatar');
-                        
-                        const img = avatarContainer.querySelector('img');
-                        if (img && img.src) {
-                            this.showCustomImagePreview(img.src);
+                // Start online status ping
+                this.startOnlineStatusInterval();
+                
+                // Setup keyboard visibility detection
+                this.setupKeyboardVisibilityDetection();
+            },
+            
+            // Setup keyboard visibility detection
+            setupKeyboardVisibilityDetection() {
+                // Detect Android keyboard using visual viewport height changes
+                if (window.visualViewport) {
+                    const viewportHandler = () => {
+                        // On Android, when keyboard opens, the visual viewport height becomes smaller
+                        const isKeyboardVisible = window.visualViewport.height < window.innerHeight * 0.75;
+                        if (isKeyboardVisible !== this.isKeyboardVisible) {
+                            this.isKeyboardVisible = isKeyboardVisible;
+                            document.body.classList.toggle('keyboard-open', isKeyboardVisible);
+                            
+                            // If emoji picker is open and keyboard appears, close emoji picker
+                            if (isKeyboardVisible && this.emojiPickerVisible) {
+                                this.closeEmojiPicker();
+                            }
+                            
+                            // Adjust scroll position when keyboard appears
+                            if (isKeyboardVisible) {
+                                this.scrollToBottom();
+                            }
                         }
+                    };
+                    
+                    window.visualViewport.addEventListener('resize', viewportHandler);
+                }
+                
+                // Focus/blur events as fallback
+                document.addEventListener('focusin', (e) => {
+                    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+                        document.body.classList.add('keyboard-open');
+                        this.isKeyboardVisible = true;
+                        
+                        // If emoji picker is open and keyboard appears, close emoji picker
+                        if (this.emojiPickerVisible) {
+                            this.closeEmojiPicker();
+                        }
+                        
+                        // Scroll to bottom with a delay to ensure the keyboard is fully open
+                        setTimeout(() => {
+                            this.scrollToBottom();
+                        }, 300);
                     }
                 });
+                
+                document.addEventListener('focusout', (e) => {
+                    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+                        // Use a short delay to avoid flickering when changing between input fields
+                        setTimeout(() => {
+                            const activeElement = document.activeElement;
+                            if (activeElement.tagName !== 'INPUT' && activeElement.tagName !== 'TEXTAREA') {
+                                document.body.classList.remove('keyboard-open');
+                                this.isKeyboardVisible = false;
+                            }
+                        }, 100);
+                    }
+                });
+            },
+            
+            // Start interval to update online status
+            startOnlineStatusInterval() {
+                if (this.onlineStatusInterval) {
+                    clearInterval(this.onlineStatusInterval);
+                }
+                
+                this.onlineStatusInterval = setInterval(() => {
+                    if (this.currentUser && this.currentUser.uid) {
+                        this.updateOnlineStatus();
+                    }
+                }, 60000); // Update every minute
+            },
+            
+            // Update online status
+            async updateOnlineStatus() {
+                try {
+                    if (!this.currentUser || !this.currentUser.uid) return;
+                    
+                    await db.collection('users').doc(this.currentUser.uid).update({
+                        online: true,
+                        lastSeen: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                } catch (error) {
+                    console.error("Error updating online status:", error);
+                }
             },
             
             // Check total user count
@@ -2609,30 +2607,17 @@
                 appElement.innerHTML = `
                     <div class="loading" style="height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; background-color: var(--bg-color);">
                         <div style="margin-bottom: 40px; text-align: center;">
-                            <h1 style="font-size: 32px; margin-bottom: 10px; background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">BetXchange</h1>
+                            <h1 style="font-size: 32px; margin-bottom: 10px; background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">ChatXchange</h1>
                             <p style="color: var(--secondary-text);">Chargement en cours...</p>
                         </div>
                         <div class="spinner"></div>
-                        <button class="auth-fallback-btn" onclick="app.goToAuth()">Problème de connexion? Appuyez ici</button>
                     </div>
                 `;
-            },
-            
-            // Fallback method to go to auth screen
-            goToAuth() {
-                clearTimeout(this.authTimeoutId);
-                this.isAuthLoaded = true;
-                this.currentScreen = 'auth';
-                this.render();
             },
             
             // Setup authentication listener
             setupAuthListener() {
                 auth.onAuthStateChanged(async (user) => {
-                    // Clear timeout for fallback UI
-                    clearTimeout(this.authTimeoutId);
-                    this.isAuthLoaded = true;
-                    
                     if (user) {
                         // User is signed in
                         try {
@@ -2663,10 +2648,6 @@
                                     if (userData.theme.gradient) {
                                         this.changeAccentGradient(userData.theme.gradient, false);
                                     }
-                                    
-                                    if (userData.theme.chatBubbleShape) {
-                                        this.changeChatBubbleShape(userData.theme.chatBubbleShape, false);
-                                    }
                                 }
                                 
                                 // Set user state
@@ -2692,8 +2673,8 @@
                                 // Show welcome notification
                                 this.showBannerNotification(`Bienvenue, ${userData.username}!`, 'success');
                                 
-                                // Start message cleanup interval
-                                this.startMessageCleanup();
+                                // Start online status interval
+                                this.startOnlineStatusInterval();
                                 
                             } else {
                                 // User document not found, sign out
@@ -2712,39 +2693,16 @@
                         // User is signed out
                         this.currentUser = null;
                         this.currentScreen = 'auth';
-                        this.stopMessageCleanup();
+                        
+                        // Clear intervals
+                        if (this.onlineStatusInterval) {
+                            clearInterval(this.onlineStatusInterval);
+                            this.onlineStatusInterval = null;
+                        }
                     }
                     
                     this.render();
                 });
-                
-                // Handle auth initialization error
-                auth.signInAnonymously().catch((error) => {
-                    console.error("Auth initialization error:", error);
-                    // We'll show fallback UI if the timeout triggers
-                });
-            },
-            
-            // Start message cleanup interval
-            startMessageCleanup() {
-                // Clean up old messages every 24 hours
-                this.stopMessageCleanup(); // Stop existing interval if any
-                
-                // Run cleanup once on login
-                cleanupOldMessages();
-                
-                // Set the interval
-                this.messageCleanupInterval = setInterval(() => {
-                    cleanupOldMessages();
-                }, 24 * 60 * 60 * 1000); // 24 hours
-            },
-            
-            // Stop message cleanup interval
-            stopMessageCleanup() {
-                if (this.messageCleanupInterval) {
-                    clearInterval(this.messageCleanupInterval);
-                    this.messageCleanupInterval = null;
-                }
             },
             
             // Apply accent color
@@ -2821,41 +2779,6 @@
                 this.render();
             },
             
-            // Change chat bubble shape
-            changeChatBubbleShape(shape, savePreference = true) {
-                this.chatBubbleShape = shape;
-                
-                // Update CSS variables based on selected shape
-                switch (shape) {
-                    case 'rounded':
-                        document.documentElement.style.setProperty('--chat-bubble-border-radius', '24px');
-                        document.documentElement.style.setProperty('--chat-bubble-border-radius-sent-br', '8px');
-                        document.documentElement.style.setProperty('--chat-bubble-border-radius-received-bl', '8px');
-                        break;
-                    case 'modern':
-                        document.documentElement.style.setProperty('--chat-bubble-border-radius', '16px');
-                        document.documentElement.style.setProperty('--chat-bubble-border-radius-sent-br', '0px');
-                        document.documentElement.style.setProperty('--chat-bubble-border-radius-received-bl', '0px');
-                        break;
-                    case 'square':
-                        document.documentElement.style.setProperty('--chat-bubble-border-radius', '8px');
-                        document.documentElement.style.setProperty('--chat-bubble-border-radius-sent-br', '8px');
-                        document.documentElement.style.setProperty('--chat-bubble-border-radius-received-bl', '8px');
-                        break;
-                    default: // default
-                        document.documentElement.style.setProperty('--chat-bubble-border-radius', '18px');
-                        document.documentElement.style.setProperty('--chat-bubble-border-radius-sent-br', '4px');
-                        document.documentElement.style.setProperty('--chat-bubble-border-radius-received-bl', '4px');
-                }
-                
-                // Save preference to user document if logged in
-                if (savePreference && this.currentUser && this.currentUser.uid) {
-                    this.saveThemePreference();
-                }
-                
-                this.render();
-            },
-            
             // Save theme preference
             saveThemePreference() {
                 if (this.currentUser && this.currentUser.uid) {
@@ -2863,8 +2786,7 @@
                         theme: { 
                             mode: this.isDarkMode ? 'dark' : 'light', 
                             color: this.accentColor,
-                            gradient: this.accentGradient,
-                            chatBubbleShape: this.chatBubbleShape
+                            gradient: this.accentGradient
                         }
                     }).catch(error => {
                         console.error("Error updating theme preference:", error);
@@ -2947,8 +2869,7 @@
                         theme: { 
                             mode: this.isDarkMode ? 'dark' : 'light', 
                             color: this.accentColor,
-                            gradient: this.accentGradient,
-                            chatBubbleShape: this.chatBubbleShape
+                            gradient: this.accentGradient
                         },
                         blockedUsers: []
                     });
@@ -2993,13 +2914,16 @@
                                         });
                                     }
                                     
-                                    // Stop cleanup interval
-                                    this.stopMessageCleanup();
-                                    
                                     // Sign out
                                     await auth.signOut();
                                     this.showBannerNotification("Déconnexion réussie", "success");
                                     this.closeModal();
+                                    
+                                    // Clear intervals
+                                    if (this.onlineStatusInterval) {
+                                        clearInterval(this.onlineStatusInterval);
+                                        this.onlineStatusInterval = null;
+                                    }
                                     
                                 } catch (error) {
                                     console.error("Logout error:", error);
@@ -3043,6 +2967,12 @@
                                     this.showBannerNotification("Compte supprimé avec succès", "success");
                                     this.closeModal();
                                     this.totalUserCount--;
+                                    
+                                    // Clear intervals
+                                    if (this.onlineStatusInterval) {
+                                        clearInterval(this.onlineStatusInterval);
+                                        this.onlineStatusInterval = null;
+                                    }
                                     
                                 } catch (error) {
                                     console.error("Account deletion error:", error);
@@ -3172,6 +3102,7 @@
                                                 username: userData.username,
                                                 avatar: userData.avatar,
                                                 online: userData.online,
+                                                lastSeen: userData.lastSeen?.toDate() || null,
                                                 isBlocked
                                             },
                                             lastMessage: conversationData.lastMessage,
@@ -3194,9 +3125,6 @@
                         this.conversations = conversations;
                         this.filterConversations();
                         this.render();
-                    }, error => {
-                        console.error("Error listening to conversations:", error);
-                        this.showBannerNotification("Erreur de connexion aux conversations", "error");
                     });
                     
                 } catch (error) {
@@ -3384,15 +3312,83 @@
                     this.filterUsers();
                     this.render();
                     
+                    // Set up real-time listener for online status updates
+                    this.setupOnlineStatusListener();
+                    
                 } catch (error) {
                     console.error("Error loading users:", error);
                     this.showBannerNotification("Erreur lors du chargement des utilisateurs", "error");
                 }
             },
             
+            // Setup online status listener
+            setupOnlineStatusListener() {
+                // Listen for changes to users' online status
+                const usersRef = db.collection('users');
+                
+                // Create listener for online status changes
+                usersRef.onSnapshot(snapshot => {
+                    snapshot.docChanges().forEach(change => {
+                        // Skip current user
+                        if (change.doc.id === this.currentUser?.uid) return;
+                        
+                        const userData = change.doc.data();
+                        
+                        // Update users list
+                        this.users = this.users.map(user => {
+                            if (user.uid === change.doc.id) {
+                                return {
+                                    ...user,
+                                    online: userData.online,
+                                    lastSeen: userData.lastSeen?.toDate() || user.lastSeen
+                                };
+                            }
+                            return user;
+                        });
+                        
+                        // Update conversations list
+                        this.conversations = this.conversations.map(conversation => {
+                            if (conversation.otherUser.uid === change.doc.id) {
+                                return {
+                                    ...conversation,
+                                    otherUser: {
+                                        ...conversation.otherUser,
+                                        online: userData.online,
+                                        lastSeen: userData.lastSeen?.toDate() || conversation.otherUser.lastSeen
+                                    }
+                                };
+                            }
+                            return conversation;
+                        });
+                        
+                        // Update current chat if needed
+                        if (this.currentChat && this.currentChat.otherUser.uid === change.doc.id) {
+                            this.currentChat = {
+                                ...this.currentChat,
+                                otherUser: {
+                                    ...this.currentChat.otherUser,
+                                    online: userData.online,
+                                    lastSeen: userData.lastSeen?.toDate() || this.currentChat.otherUser.lastSeen
+                                }
+                            };
+                        }
+                    });
+                    
+                    // Re-filter and render
+                    this.filterUsers();
+                    this.filterConversations();
+                    this.render();
+                }, error => {
+                    console.error("Error listening to online status changes:", error);
+                });
+            },
+            
             // Start chat with user
             async startChat(user) {
-                // We allow starting chats with blocked users to enable unblocking
+                if (user.isBlocked) {
+                    this.showBannerNotification("Vous avez bloqué cet utilisateur", "warning");
+                    return;
+                }
                 
                 // Create conversation ID (sort UIDs to ensure consistent ID)
                 const sortedIds = [this.currentUser.uid, user.uid].sort();
@@ -3451,8 +3447,7 @@
                     // Query for messages
                     const query = db.collection('messages')
                         .where('conversationId', '==', conversationId)
-                        .orderBy('timestamp', 'desc')  // Load newest first
-                        .limit(this.maxMessagesToLoad);  // Limit number of messages to load
+                        .orderBy('timestamp', 'asc');
                     
                     // Live listener
                     query.onSnapshot((snapshot) => {
@@ -3466,12 +3461,6 @@
                                 return;
                             }
                             
-                            // Skip messages from blocked users (unless it's my message)
-                            if (messageData.senderId !== this.currentUser.uid && 
-                                this.currentChat?.otherUser.isBlocked) {
-                                return;
-                            }
-                            
                             messages.push({
                                 id: doc.id,
                                 senderId: messageData.senderId,
@@ -3481,14 +3470,11 @@
                                 timestamp: messageData.timestamp?.toDate() || new Date(),
                                 read: messageData.read,
                                 edited: messageData.edited || false,
-                                reactions: messageData.reactions || {},
-                                sending: this.pendingMessages.has(doc.id) ? 
-                                    this.pendingMessages.get(doc.id) : false
+                                reactions: messageData.reactions || {}
                             });
                         });
                         
-                        // Reverse to get chronological order
-                        this.messages = messages.reverse();
+                        this.messages = messages;
                         this.render();
                         
                         // Scroll to bottom
@@ -3496,9 +3482,6 @@
                         
                         // Mark messages as read
                         this.markMessagesAsRead(conversationId);
-                    }, error => {
-                        console.error("Error listening to messages:", error);
-                        this.showBannerNotification("Erreur de connexion aux messages", "error");
                     });
                     
                 } catch (error) {
@@ -3558,12 +3541,8 @@
                     return;
                 }
                 
-                // Set compression quality based on device memory
-                const compressionQuality = this.isLowMemoryDevice ? 0.6 : 0.8;
-                const maxWidth = this.isLowMemoryDevice ? 800 : 1200;
-                
                 // Compress and create preview
-                this.compressImage(file, maxWidth, compressionQuality)
+                this.compressImage(file, 1200, 0.8)
                     .then(compressedFile => {
                         const reader = new FileReader();
                         reader.onload = (e) => {
@@ -3657,11 +3636,8 @@
                     return;
                 }
                 
-                // Set compression quality based on device memory
-                const compressionQuality = this.isLowMemoryDevice ? 0.7 : 0.8;
-                
                 // Compress and upload avatar
-                this.compressImage(file, 300, compressionQuality)
+                this.compressImage(file, 300, 0.8)
                     .then(compressedFile => {
                         this.convertBlobToBase64(compressedFile)
                             .then(base64Avatar => {
@@ -3816,12 +3792,6 @@
             async sendMessage() {
                 if (!this.currentChat) return;
                 
-                // Don't allow sending messages to blocked users
-                if (this.currentChat.otherUser.isBlocked) {
-                    this.showBannerNotification("Ce contact est bloqué", "warning");
-                    return;
-                }
-                
                 const messageInput = document.getElementById('message-input');
                 const text = messageInput ? messageInput.value.trim() : '';
                 
@@ -3829,12 +3799,49 @@
                 if (!text && !this.selectedImage) return;
                 
                 try {
-                    // Create a temporary message ID to track this message
-                    const tempId = `temp_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+                    // Generate a random ID for this message to track in UI
+                    const tempMessageId = 'temp_' + Date.now().toString();
                     
-                    // Add the message to the pending list
-                    this.pendingMessages.set(tempId, true);
+                    // Add to sending messages set
+                    this.sendingMessages.add(tempMessageId);
                     
+                    // Update UI immediately to show message sending state
+                    // Create a temporary message object
+                    const tempMessage = {
+                        id: tempMessageId,
+                        senderId: this.currentUser.uid,
+                        text: text,
+                        image: this.selectedImage ? this.imagePreview : null,
+                        messageType: this.selectedImage ? 'image' : 'text',
+                        timestamp: new Date(),
+                        read: false,
+                        edited: false,
+                        reactions: {},
+                        isSending: true
+                    };
+                    
+                    // Add to messages array
+                    this.messages.push(tempMessage);
+                    
+                    // Clear input and selected image
+                    if (messageInput) {
+                        messageInput.value = '';
+                    }
+                    
+                    // Store selected image before clearing
+                    const imageToSend = this.selectedImage;
+                    
+                    // Clear selected image from UI
+                    this.selectedImage = null;
+                    this.imagePreview = null;
+                    
+                    // Re-render to show sending state
+                    this.render();
+                    
+                    // Scroll to bottom
+                    this.scrollToBottom();
+                    
+                    // Prepare message data
                     let messageData = {
                         conversationId: this.currentChat.id,
                         senderId: this.currentUser.uid,
@@ -3842,9 +3849,7 @@
                         read: false,
                         edited: false,
                         hidden: {},
-                        reactions: {},
-                        // Add expiration date for auto-cleanup
-                        expirationDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000) // 5 days from now
+                        reactions: {}
                     };
                     
                     let lastMessageText = '';
@@ -3856,35 +3861,10 @@
                         lastMessageText = text;
                     }
                     
-                    // Clear input immediately to improve responsiveness
-                    if (messageInput) {
-                        messageInput.value = '';
-                        messageInput.blur(); // Close keyboard after sending message
-                    }
-                    
-                    // Show optimistic UI update for text messages
-                    const optimisticMessage = {
-                        id: tempId,
-                        senderId: this.currentUser.uid,
-                        text: text,
-                        timestamp: new Date(),
-                        read: false,
-                        edited: false,
-                        sending: true,
-                        reactions: {}
-                    };
-                    
-                    // Add to local messages array and render
-                    if (text) {
-                        this.messages.push(optimisticMessage);
-                        this.render();
-                        this.scrollToBottom();
-                    }
-                    
                     // Handle image message
-                    if (this.selectedImage) {
+                    if (imageToSend) {
                         // Convert image to base64
-                        const base64Image = await this.fileToBase64(this.selectedImage);
+                        const base64Image = await this.fileToBase64(imageToSend);
                         messageData.image = base64Image;
                         messageData.messageType = 'image';
                         messageType = 'image';
@@ -3894,10 +3874,10 @@
                         }
                     }
                     
-                    // Create message in Firestore
-                    const docRef = await db.collection('messages').add(messageData);
+                    // Send message to Firestore
+                    const messageRef = await db.collection('messages').add(messageData);
                     
-                    // Update conversation
+                    // Update conversation with last message info
                     await db.collection('conversations').doc(this.currentChat.id).update({
                         lastMessage: lastMessageText,
                         lastMessageType: messageType,
@@ -3905,25 +3885,24 @@
                         lastMessageSenderId: this.currentUser.uid
                     });
                     
-                    // Update the pending message with the real ID
-                    this.pendingMessages.delete(tempId);
-                    this.pendingMessages.set(docRef.id, false); // Mark as sent
+                    // Remove from sending messages set after confirmation
+                    this.sendingMessages.delete(tempMessageId);
                     
-                    // Clear selected image
-                    this.selectedImage = null;
-                    this.imagePreview = null;
-                    
-                    // Render again to update UI
-                    this.render();
-                    this.scrollToBottom();
+                    // The message will be updated through the Firestore listener
                     
                 } catch (error) {
                     console.error("Error sending message:", error);
                     this.showBannerNotification("Erreur lors de l'envoi du message", "error");
                     
-                    // Remove the optimistic message
-                    this.messages = this.messages.filter(msg => !msg.sending);
-                    this.render();
+                    // Remove from sending messages
+                    const failedMessageId = Array.from(this.sendingMessages)[0]; // Just get the first one for simplicity
+                    if (failedMessageId) {
+                        this.sendingMessages.delete(failedMessageId);
+                        
+                        // Remove the failed message from the UI
+                        this.messages = this.messages.filter(msg => msg.id !== failedMessageId);
+                        this.render();
+                    }
                 }
             },
             
@@ -3977,12 +3956,31 @@
                     // Update message with new reactions
                     await messageRef.update({ reactions });
                     
+                    // Add to recently used emojis list if not already there
+                    if (!existingReaction) {
+                        this.addToRecentEmojis(emoji);
+                    }
+                    
                     // Close reaction picker
                     this.closeReactionPicker();
                     
                 } catch (error) {
                     console.error("Error adding reaction:", error);
                     this.showNotification("Erreur lors de l'ajout de la réaction", "error");
+                }
+            },
+            
+            // Add to recent emojis list
+            addToRecentEmojis(emoji) {
+                // Remove the emoji if it's already in the list
+                this.recentEmojis = this.recentEmojis.filter(e => e !== emoji);
+                
+                // Add emoji to the beginning of the list
+                this.recentEmojis.unshift(emoji);
+                
+                // Keep only the most recent 8 emojis
+                if (this.recentEmojis.length > 8) {
+                    this.recentEmojis = this.recentEmojis.slice(0, 8);
                 }
             },
             
@@ -4050,26 +4048,102 @@
                     return;
                 }
                 
+                // When showing emoji picker, blur any focused input to hide keyboard
+                if (document.activeElement instanceof HTMLInputElement || 
+                    document.activeElement instanceof HTMLTextAreaElement) {
+                    document.activeElement.blur();
+                }
+                
+                // Create the main picker container
                 const pickerContainer = document.createElement('div');
                 pickerContainer.className = 'emoji-picker';
                 
-                // Add more emojis for the picker
-                const emojis = [
-                    '😀', '😃', '😄', '😁', '😆', '😅', '😂', '🤣', '😊', '😇', 
-                    '🙂', '🙃', '😉', '😌', '😍', '🥰', '😘', '😗', '😙', '😚', 
-                    '😋', '😛', '😝', '😜', '🤪', '🤨', '🧐', '🤓', '😎', '🤩',
-                    '👍', '👎', '👌', '✌️', '🤞', '👊', '✊', '🤛', '🤜', '👏',
-                    '❤️', '🧡', '💛', '💚', '💙', '💜', '🖤', '💔', '❣️', '💕',
-                    '🔥', '⭐', '🌟', '✨', '💯', '💢', '💫', '💦', '💤', '🎉'
+                // Create tab header
+                let headerHtml = `<div class="emoji-picker-header">`;
+                
+                const emojiCategories = [
+                    { id: 'recent', name: '✨ Récents' },
+                    { id: 'smileys', name: '😀 Smileys' },
+                    { id: 'people', name: '👍 Gestes' },
+                    { id: 'animals', name: '🐶 Animaux' },
+                    { id: 'food', name: '🍎 Nourriture' },
+                    { id: 'activities', name: '⚽ Activités' },
+                    { id: 'objects', name: '💻 Objets' },
+                    { id: 'symbols', name: '❤️ Symboles' }
                 ];
                 
-                pickerContainer.innerHTML = emojis.map(emoji => 
-                    `<div class="emoji-item" data-emoji="${emoji}">${emoji}</div>`
-                ).join('');
+                emojiCategories.forEach(category => {
+                    headerHtml += `
+                        <div class="emoji-category-tab ${this.activeEmojiCategory === category.id ? 'active' : ''}" 
+                             data-category="${category.id}">${category.name}</div>
+                    `;
+                });
+                
+                headerHtml += `</div>`;
+                
+                // Add emoji content container
+                let contentHtml = `<div class="emoji-picker-content">`;
+                
+                // Emoji data
+                const emojisData = {
+                    recent: this.recentEmojis,
+                    smileys: ['😀', '😃', '😄', '😁', '😆', '😅', '😂', '🤣', '😊', '😇', '🙂', '🙃', '😉', '😌', '😍', '🥰', '😘', '😗', '😙', '😚', '😋', '😛', '😝', '😜', '🤪', '🤨', '🧐', '🤓', '😎', '🤩'],
+                    people: ['👍', '👎', '👌', '✌️', '🤞', '👊', '✊', '🤛', '🤜', '👏', '🙌', '👐', '🤲', '🤝', '🙏', '💪', '🦾', '🦿', '🦵', '🦶'],
+                    animals: ['🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼', '🐨', '🐯', '🦁', '🐮', '🐷', '🐸', '🐵', '🙈', '🙉', '🙊'],
+                    food: ['🍎', '🍐', '🍊', '🍋', '🍌', '🍉', '🍇', '🍓', '🍈', '🍒', '🍑', '🥭', '🍍', '🥥', '🥝'],
+                    activities: ['⚽', '🏀', '🏈', '⚾', '🥎', '🎾', '🏐', '🏉', '🥏', '🎱', '🏓', '🏸', '🏒', '🏑', '🥍'],
+                    objects: ['⌚', '📱', '💻', '⌨️', '🖥️', '🖨️', '🖱️', '🖲️', '📀', '💿', '💾', '💽', '📼', '📷', '📸'],
+                    symbols: ['❤️', '🧡', '💛', '💚', '💙', '💜', '🖤', '❣️', '💕', '💞', '💓', '💗', '💖', '💘', '💝']
+                };
+                
+                // Show current category
+                const categoryName = emojiCategories.find(c => c.id === this.activeEmojiCategory)?.name || 'Emojis';
+                const emojis = emojisData[this.activeEmojiCategory] || [];
+                
+                // Only show recent category if there are recent emojis
+                if (this.activeEmojiCategory === 'recent' && emojis.length === 0) {
+                    contentHtml += `
+                        <div class="emoji-category">
+                            <div class="emoji-category-title">Pas d'emojis récents</div>
+                            <div style="text-align: center; padding: 20px; color: var(--secondary-text);">
+                                Les emojis que vous utilisez apparaîtront ici
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    contentHtml += `
+                        <div class="emoji-category">
+                            <div class="emoji-grid">
+                                ${emojis.map(emoji => 
+                                    `<div class="emoji-item" data-emoji="${emoji}">${emoji}</div>`
+                                ).join('')}
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                contentHtml += `</div>`;
+                
+                pickerContainer.innerHTML = headerHtml + contentHtml;
                 
                 document.body.appendChild(pickerContainer);
                 
-                // Add event listeners
+                // Make the emoji button look like it's in an "active" state
+                const emojiButton = document.querySelector('.emoji-button');
+                if (emojiButton) {
+                    emojiButton.classList.add('emoji-open');
+                }
+                
+                // Add event listeners to tabs
+                pickerContainer.querySelectorAll('.emoji-category-tab').forEach(tab => {
+                    tab.addEventListener('click', (e) => {
+                        this.activeEmojiCategory = e.target.dataset.category;
+                        this.closeEmojiPicker();
+                        this.showEmojiPicker(); // Reopen with new category
+                    });
+                });
+                
+                // Add event listeners to emojis
                 pickerContainer.querySelectorAll('.emoji-item').forEach(item => {
                     item.addEventListener('click', (e) => {
                         const emoji = e.target.dataset.emoji;
@@ -4082,8 +4156,10 @@
                             messageInput.focus();
                             messageInput.selectionStart = cursorPos + emoji.length;
                             messageInput.selectionEnd = cursorPos + emoji.length;
+                            
+                            // Add to recently used emojis
+                            this.addToRecentEmojis(emoji);
                         }
-                        this.closeEmojiPicker();
                     });
                 });
                 
@@ -4094,9 +4170,41 @@
             closeEmojiPicker() {
                 const picker = document.querySelector('.emoji-picker');
                 if (picker) {
-                    picker.remove();
+                    picker.classList.add('closing');
+                    setTimeout(() => {
+                        picker.remove();
+                        this.emojiPickerVisible = false;
+                        
+                        // Reset emoji button to normal state
+                        const emojiButton = document.querySelector('.emoji-button');
+                        if (emojiButton) {
+                            emojiButton.classList.remove('emoji-open');
+                        }
+                    }, 300);
+                } else {
+                    this.emojiPickerVisible = false;
+                    
+                    // Reset emoji button to normal state
+                    const emojiButton = document.querySelector('.emoji-button');
+                    if (emojiButton) {
+                        emojiButton.classList.remove('emoji-open');
+                    }
                 }
-                this.emojiPickerVisible = false;
+            },
+            
+            // Toggle emoji/keyboard button
+            toggleEmojiKeyboard() {
+                if (this.emojiPickerVisible) {
+                    // Close emoji picker and focus input to show keyboard
+                    this.closeEmojiPicker();
+                    const messageInput = document.getElementById('message-input');
+                    if (messageInput) {
+                        messageInput.focus();
+                    }
+                } else {
+                    // Hide keyboard and show emoji picker
+                    this.showEmojiPicker();
+                }
             },
             
             // Block/unblock user
@@ -4156,9 +4264,6 @@
                                 ...this.currentChat,
                                 otherUser: { ...this.currentChat.otherUser, isBlocked: shouldBlock }
                             };
-                            
-                            // Reload messages to filter those from blocked user
-                            this.loadMessages(this.currentChat.id);
                         }
                         
                         this.showBannerNotification(
@@ -4172,212 +4277,6 @@
                     console.error("Error blocking/unblocking user:", error);
                     this.showBannerNotification("Erreur lors de l'action", "error");
                 }
-            },
-            
-            // Setup message interaction (long press to select)
-            setupMessageInteraction() {
-                const messageBubbles = document.querySelectorAll('.message-bubble');
-                
-                messageBubbles.forEach(bubble => {
-                    const messageId = bubble.dataset.id;
-                    
-                    // Double tap for reactions
-                    let lastTap = 0;
-                    bubble.addEventListener('click', (e) => {
-                        // Handle image click
-                        if (e.target.classList.contains('message-image')) {
-                            this.showCustomImagePreview(e.target.src);
-                            return;
-                        }
-                        
-                        // Handle double tap for reactions
-                        const now = new Date().getTime();
-                        const timeDiff = now - lastTap;
-                        if (timeDiff < 300 && timeDiff > 0) {
-                            // Double tap detected - show reaction picker
-                            this.showReactionPicker(messageId, e);
-                            e.preventDefault();
-                        }
-                        lastTap = now;
-                    });
-                    
-                    // Long press to select
-                    let longPressTimer;
-                    
-                    bubble.addEventListener('touchstart', () => {
-                        longPressTimer = setTimeout(() => {
-                            // Vibrate if supported
-                            if (navigator.vibrate) {
-                                navigator.vibrate(50);
-                            }
-                            this.toggleMessageSelection(messageId);
-                        }, 500);
-                    });
-                    
-                    bubble.addEventListener('touchend', () => {
-                        clearTimeout(longPressTimer);
-                    });
-                    
-                    bubble.addEventListener('touchmove', () => {
-                        clearTimeout(longPressTimer);
-                    });
-                });
-                
-                // Handle conversation item long press
-                const conversationItems = document.querySelectorAll('.conversation-item');
-                
-                conversationItems.forEach(item => {
-                    const conversationId = item.dataset.id;
-                    
-                    let longPressTimer;
-                    
-                    item.addEventListener('touchstart', () => {
-                        longPressTimer = setTimeout(() => {
-                            // Vibrate if supported
-                            if (navigator.vibrate) {
-                                navigator.vibrate(50);
-                            }
-                            
-                            // Enter conversation selection mode
-                            this.enterConversationSelectionMode();
-                            this.toggleConversationSelection(conversationId);
-                            
-                            // Prevent default click event
-                            item.addEventListener('click', this.preventClick, { once: true });
-                        }, 500);
-                    });
-                    
-                    item.addEventListener('touchend', () => {
-                        clearTimeout(longPressTimer);
-                    });
-                    
-                    item.addEventListener('touchmove', () => {
-                        clearTimeout(longPressTimer);
-                    });
-                });
-            },
-            
-            // Prevent default click event
-            preventClick(e) {
-                e.stopPropagation();
-                e.preventDefault();
-            },
-            
-            // Toggle message selection
-            toggleMessageSelection(messageId) {
-                const message = this.messages.find(m => m.id === messageId);
-                if (!message) return;
-                
-                if (this.selectedMessages.has(messageId)) {
-                    this.selectedMessages.delete(messageId);
-                } else {
-                    // Clear previous selection and select new message
-                    this.selectedMessages.clear();
-                    this.selectedMessages.add(messageId);
-                }
-                
-                // Update selection mode status
-                this.selectionMode = this.selectedMessages.size > 0;
-                
-                // Render to update UI
-                this.render();
-            },
-            
-            // Toggle conversation selection
-            toggleConversationSelection(conversationId) {
-                if (this.selectedConversations.has(conversationId)) {
-                    this.selectedConversations.delete(conversationId);
-                } else {
-                    this.selectedConversations.add(conversationId);
-                }
-                
-                // Exit selection mode if no conversations selected
-                if (this.selectedConversations.size === 0) {
-                    this.exitConversationSelectionMode();
-                } else {
-                    this.render();
-                }
-            },
-            
-            // Exit selection mode
-            exitSelectionMode() {
-                this.selectionMode = false;
-                this.selectedMessages.clear();
-                this.render();
-            },
-            
-            // Enter conversation selection mode
-            enterConversationSelectionMode() {
-                this.isConversationSelectionMode = true;
-                this.render();
-            },
-            
-            // Exit conversation selection mode
-            exitConversationSelectionMode() {
-                this.isConversationSelectionMode = false;
-                this.selectedConversations.clear();
-                this.render();
-            },
-            
-            // Update profile field
-            async updateProfileField(field, value) {
-                try {
-                    if (!this.currentUser) return;
-                    
-                    await db.collection('users').doc(this.currentUser.uid).update({
-                        [field]: value
-                    });
-                    
-                    // Update local state
-                    this.currentUser[field] = value;
-                    
-                    this.showBannerNotification("Profil mis à jour", "success");
-                    this.isEditing = false;
-                    this.editingField = null;
-                    this.render();
-                    
-                } catch (error) {
-                    console.error("Error updating profile:", error);
-                    this.showBannerNotification("Erreur lors de la mise à jour", "error");
-                }
-            },
-            
-            // Start editing profile field
-            startEditingField(field) {
-                this.isEditing = true;
-                this.editingField = field;
-                this.render();
-                
-                // Focus the input
-                setTimeout(() => {
-                    const input = document.getElementById(`edit-${field}`);
-                    if (input) {
-                        input.focus();
-                    }
-                }, 0);
-            },
-            
-            // Cancel editing profile field
-            cancelEditingField() {
-                this.isEditing = false;
-                this.editingField = null;
-                this.render();
-            },
-            
-            // Save editing profile field
-            saveEditingField() {
-                if (!this.editingField) return;
-                
-                const input = document.getElementById(`edit-${this.editingField}`);
-                if (!input) return;
-                
-                const value = input.value.trim();
-                if (!value) {
-                    this.showBannerNotification("La valeur ne peut pas être vide", "error");
-                    return;
-                }
-                
-                this.updateProfileField(this.editingField, value);
             },
             
             // Show custom image preview
@@ -4417,6 +4316,9 @@
                 
                 document.body.appendChild(overlay);
                 this.customImagePreview = overlay;
+                
+                // Prevent scrolling on body
+                document.body.style.overflow = 'hidden';
             },
             
             // Close custom image preview
@@ -4424,6 +4326,9 @@
                 if (this.customImagePreview) {
                     this.customImagePreview.remove();
                     this.customImagePreview = null;
+                    
+                    // Re-enable scrolling
+                    document.body.style.overflow = '';
                 }
             },
             
@@ -4601,26 +4506,27 @@
                 let icon = '';
                 switch(type) {
                     case 'success':
-                        icon = '<svg class="banner-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 13L9 17L19 7" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+                        icon = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13L9 17L19 7" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
                         break;
                     case 'error':
-                        icon = '<svg class="banner-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M18 6L6 18M6 6L18 18" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+                        icon = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6L18 18" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
                         break;
                     case 'warning':
-                        icon = '<svg class="banner-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 9V13M12 17H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+                        icon = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9V13M12 17H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
                         break;
                     default:
-                        icon = '<svg class="banner-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M13 16H12V12H11M12 8H12.01M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+                        icon = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 16H12V12H11M12 8H12.01M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
                 }
                 
                 banner.innerHTML = `
                     <div class="banner-content">
-                        ${icon}
+                        <div class="banner-icon">${icon}</div>
                         <div class="banner-message">${message}</div>
                     </div>
                     <button class="banner-close">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
                         </svg>
                     </button>
                 `;
@@ -4984,12 +4890,218 @@
                 }
             },
             
+            // Setup message interaction (long press to select)
+            setupMessageInteraction() {
+                const messageBubbles = document.querySelectorAll('.message-bubble');
+                
+                messageBubbles.forEach(bubble => {
+                    const messageId = bubble.dataset.id;
+                    
+                    // Double tap for reactions
+                    let lastTap = 0;
+                    bubble.addEventListener('click', (e) => {
+                        // Handle image click
+                        if (e.target.classList.contains('message-image')) {
+                            this.showCustomImagePreview(e.target.src);
+                            return;
+                        }
+                        
+                        // Handle double tap for reactions
+                        const now = new Date().getTime();
+                        const timeDiff = now - lastTap;
+                        if (timeDiff < 300 && timeDiff > 0) {
+                            // Double tap detected - show reaction picker
+                            this.showReactionPicker(messageId, e);
+                            e.preventDefault();
+                        }
+                        lastTap = now;
+                    });
+                    
+                    // Long press to select
+                    let longPressTimer;
+                    
+                    bubble.addEventListener('touchstart', () => {
+                        longPressTimer = setTimeout(() => {
+                            // Vibrate if supported
+                            if (navigator.vibrate) {
+                                navigator.vibrate(50);
+                            }
+                            this.toggleMessageSelection(messageId);
+                        }, 500);
+                    });
+                    
+                    bubble.addEventListener('touchend', () => {
+                        clearTimeout(longPressTimer);
+                    });
+                    
+                    bubble.addEventListener('touchmove', () => {
+                        clearTimeout(longPressTimer);
+                    });
+                });
+                
+                // Handle conversation item long press
+                const conversationItems = document.querySelectorAll('.conversation-item');
+                
+                conversationItems.forEach(item => {
+                    const conversationId = item.dataset.id;
+                    
+                    let longPressTimer;
+                    
+                    item.addEventListener('touchstart', () => {
+                        longPressTimer = setTimeout(() => {
+                            // Vibrate if supported
+                            if (navigator.vibrate) {
+                                navigator.vibrate(50);
+                            }
+                            
+                            // Enter conversation selection mode
+                            this.enterConversationSelectionMode();
+                            this.toggleConversationSelection(conversationId);
+                            
+                            // Prevent default click event
+                            item.addEventListener('click', this.preventClick, { once: true });
+                        }, 500);
+                    });
+                    
+                    item.addEventListener('touchend', () => {
+                        clearTimeout(longPressTimer);
+                    });
+                    
+                    item.addEventListener('touchmove', () => {
+                        clearTimeout(longPressTimer);
+                    });
+                });
+            },
+            
+            // Prevent default click event
+            preventClick(e) {
+                e.stopPropagation();
+                e.preventDefault();
+            },
+            
+            // Toggle message selection
+            toggleMessageSelection(messageId) {
+                const message = this.messages.find(m => m.id === messageId);
+                if (!message) return;
+                
+                if (this.selectedMessages.has(messageId)) {
+                    this.selectedMessages.delete(messageId);
+                } else {
+                    // Clear previous selection and select new message
+                    this.selectedMessages.clear();
+                    this.selectedMessages.add(messageId);
+                }
+                
+                // Update selection mode status
+                this.selectionMode = this.selectedMessages.size > 0;
+                
+                // Render to update UI
+                this.render();
+            },
+            
+            // Toggle conversation selection
+            toggleConversationSelection(conversationId) {
+                if (this.selectedConversations.has(conversationId)) {
+                    this.selectedConversations.delete(conversationId);
+                } else {
+                    this.selectedConversations.add(conversationId);
+                }
+                
+                // Exit selection mode if no conversations selected
+                if (this.selectedConversations.size === 0) {
+                    this.exitConversationSelectionMode();
+                } else {
+                    this.render();
+                }
+            },
+            
+            // Exit selection mode
+            exitSelectionMode() {
+                this.selectionMode = false;
+                this.selectedMessages.clear();
+                this.render();
+            },
+            
+            // Enter conversation selection mode
+            enterConversationSelectionMode() {
+                this.isConversationSelectionMode = true;
+                this.render();
+            },
+            
+            // Exit conversation selection mode
+            exitConversationSelectionMode() {
+                this.isConversationSelectionMode = false;
+                this.selectedConversations.clear();
+                this.render();
+            },
+            
+            // Update profile field
+            async updateProfileField(field, value) {
+                try {
+                    if (!this.currentUser) return;
+                    
+                    await db.collection('users').doc(this.currentUser.uid).update({
+                        [field]: value
+                    });
+                    
+                    // Update local state
+                    this.currentUser[field] = value;
+                    
+                    this.showBannerNotification("Profil mis à jour", "success");
+                    this.isEditing = false;
+                    this.editingField = null;
+                    this.render();
+                    
+                } catch (error) {
+                    console.error("Error updating profile:", error);
+                    this.showBannerNotification("Erreur lors de la mise à jour", "error");
+                }
+            },
+            
+            // Start editing profile field
+            startEditingField(field) {
+                this.isEditing = true;
+                this.editingField = field;
+                this.render();
+                
+                // Focus the input
+                setTimeout(() => {
+                    const input = document.getElementById(`edit-${field}`);
+                    if (input) {
+                        input.focus();
+                    }
+                }, 0);
+            },
+            
+            // Cancel editing profile field
+            cancelEditingField() {
+                this.isEditing = false;
+                this.editingField = null;
+                this.render();
+            },
+            
+            // Save editing profile field
+            saveEditingField() {
+                if (!this.editingField) return;
+                
+                const input = document.getElementById(`edit-${this.editingField}`);
+                if (!input) return;
+                
+                const value = input.value.trim();
+                if (!value) {
+                    this.showBannerNotification("La valeur ne peut pas être vide", "error");
+                    return;
+                }
+                
+                this.updateProfileField(this.editingField, value);
+            },
+            
             // Render auth screen
             renderAuthScreen() {
                 return `
                     <div class="auth-container">
                         <div class="auth-logo">
-                            <h1>BetXchange</h1>
+                            <h1>ChatXchange</h1>
                             <p>La plateforme d'échange sécurisée</p>
                         </div>
                         
@@ -5091,17 +5203,6 @@
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M12 5V19M5 12H19" />
                                 </svg>
-                            </div>
-                        ` : ''}
-                        
-                        ${this.isLowMemoryDevice ? `
-                            <div class="low-memory-badge">
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
-                                    <line x1="12" y1="9" x2="12" y2="13"></line>
-                                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
-                                </svg>
-                                Mode économie
                             </div>
                         ` : ''}
                         
@@ -5365,6 +5466,11 @@
                             <div class="conversation-message">
                                 ${isLastMessageMine ? 'Vous: ' : ''}${truncateMessage(lastMessage, lastMessageType)}
                             </div>
+                            ${!otherUser.online && otherUser.lastSeen ? `
+                                <div class="last-seen-indicator">
+                                    <span class="user-last-active">Vu ${this.formatLastSeen(otherUser.lastSeen)}</span>
+                                </div>
+                            ` : ''}
                         </div>
                         <div class="conversation-meta">
                             <div class="conversation-time">${timeString}</div>
@@ -5636,26 +5742,6 @@
                                         </div>
                                     </div>
                                 </div>
-                                
-                                <div class="profile-field">
-                                    <div class="profile-field-label">Bulles de chat</div>
-                                    <div class="profile-field-value">
-                                        <div class="color-options">
-                                            <div class="chat-bubble-shape-option chat-bubble-shape-default ${this.chatBubbleShape === 'default' ? 'active' : ''}" 
-                                                 style="--shape-radius: 18px 18px 4px 18px;"
-                                                 onclick="app.changeChatBubbleShape('default')"></div>
-                                            <div class="chat-bubble-shape-option chat-bubble-shape-rounded ${this.chatBubbleShape === 'rounded' ? 'active' : ''}" 
-                                                 style="--shape-radius: 24px;"
-                                                 onclick="app.changeChatBubbleShape('rounded')"></div>
-                                            <div class="chat-bubble-shape-option chat-bubble-shape-modern ${this.chatBubbleShape === 'modern' ? 'active' : ''}" 
-                                                 style="--shape-radius: 16px 16px 0 16px;"
-                                                 onclick="app.changeChatBubbleShape('modern')"></div>
-                                            <div class="chat-bubble-shape-option chat-bubble-shape-square ${this.chatBubbleShape === 'square' ? 'active' : ''}" 
-                                                 style="--shape-radius: 8px;"
-                                                 onclick="app.changeChatBubbleShape('square')"></div>
-                                        </div>
-                                    </div>
-                                </div>
                             </div>
                             
                             <div class="profile-card">
@@ -5686,36 +5772,6 @@
                                         <input type="checkbox" checked>
                                         <span class="toggle-slider"></span>
                                     </label>
-                                </div>
-                                
-                                <div class="theme-toggle">
-                                    <div>
-                                        <div style="font-weight: 500;">Mode économie</div>
-                                        <div style="font-size: 14px; color: var(--secondary-text);">Adapté aux appareils à mémoire limitée</div>
-                                    </div>
-                                    <label class="toggle-switch">
-                                        <input type="checkbox" ${this.isLowMemoryDevice ? 'checked' : ''} disabled>
-                                        <span class="toggle-slider"></span>
-                                    </label>
-                                </div>
-                            </div>
-                            
-                            <div class="profile-card">
-                                <div class="profile-card-title">
-                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path>
-                                        <circle cx="12" cy="12" r="4"></circle>
-                                        <line x1="4.93" y1="4.93" x2="9.17" y2="9.17"></line>
-                                        <line x1="14.83" y1="14.83" x2="19.07" y2="19.07"></line>
-                                        <line x1="14.83" y1="9.17" x2="19.07" y2="4.93"></line>
-                                        <line x1="14.83" y1="9.17" x2="18.36" y2="5.64"></line>
-                                        <line x1="4.93" y1="19.07" x2="9.17" y2="14.83"></line>
-                                    </svg>
-                                    Conservation des données
-                                </div>
-                                
-                                <div style="padding: 12px 0; color: var(--secondary-text);">
-                                    Vos messages et images sont automatiquement supprimés après 5 jours pour préserver votre confidentialité et libérer de l'espace.
                                 </div>
                             </div>
                             
@@ -5866,18 +5922,26 @@
                                     </svg>
                                 </button>
                                 
-                                <button class="emoji-button" onclick="app.showEmojiPicker()">
-                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="                                    stroke-linecap="round" stroke-linejoin="round">
+                                <button class="emoji-button" onclick="app.toggleEmojiKeyboard()">
+                                    <svg class="emoji-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                         <circle cx="12" cy="12" r="10"></circle>
                                         <path d="M8 14s1.5 2 4 2 4-2 4-2"></path>
                                         <line x1="9" y1="9" x2="9.01" y2="9"></line>
                                         <line x1="15" y1="9" x2="15.01" y2="9"></line>
                                     </svg>
+                                                                        <svg class="keyboard-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect x="2" y="4" width="20" height="16" rx="2" ry="2"></rect>
+                                        <line x1="6" y1="8" x2="6" y2="8"></line>
+                                        <line x1="10" y1="8" x2="10" y2="8"></line>
+                                        <line x1="14" y1="8" x2="14" y2="8"></line>
+                                        <line x1="18" y1="8" x2="18" y2="8"></line>
+                                        <line x1="8" y1="12" x2="16" y2="12"></line>
+                                        <line x1="8" y1="16" x2="16" y2="16"></line>
+                                    </svg>
                                 </button>
                                 
                                 <div class="message-input-container">
-                                    <input type="text" id="message-input" class="message-input" placeholder="${this.currentChat.otherUser.isBlocked ? 'Contact bloqué' : 'Écrire un message...'}" 
-                                        onkeypress="if(event.key === 'Enter') app.sendMessage()" ${this.currentChat.otherUser.isBlocked ? 'disabled' : ''}>
+                                    <input type="text" id="message-input" class="message-input" placeholder="Écrire un message..." onkeypress="if(event.key === 'Enter') app.sendMessage()">
                                 </div>
                                 
                                 <button class="send-button" onclick="app.sendMessage()">
@@ -5965,6 +6029,7 @@
                     group.messages.forEach(message => {
                         const messageClass = isSent ? 'message-sent' : 'message-received';
                         const isSelected = this.selectedMessages.has(message.id);
+                        const isSending = this.sendingMessages.has(message.id);
                         
                         // Format time
                         const time = new Date(message.timestamp).toLocaleTimeString([], { 
@@ -5973,7 +6038,7 @@
                         });
                         
                         html += `
-                            <div class="message-bubble ${messageClass} ${isSelected ? 'selected' : ''} message-new" data-id="${message.id}">
+                            <div class="message-bubble ${messageClass} ${isSelected ? 'selected' : ''} ${isSending ? 'message-sending' : 'message-new'}" data-id="${message.id}">
                         `;
                         
                         // Render image if present
@@ -6008,22 +6073,14 @@
                             html += `</div>`;
                         }
                         
-                        // Render time and read/sending status
+                        // Render time and read status
                         html += `
                                 <div class="message-time">
                                     ${time}
                                     ${message.edited ? ' (modifié)' : ''}
-                                    ${isSent ? `
+                                    ${isSent && !isSending ? `
                                     <span class="message-status">
-                                        ${message.sending ? `
-                                            <span class="sending-indicator">
-                                                <span class="sending-dots">
-                                                    <span class="sending-dot"></span>
-                                                    <span class="sending-dot"></span>
-                                                    <span class="sending-dot"></span>
-                                                </span>
-                                            </span>
-                                        ` : message.read ? `
+                                        ${message.read ? `
                                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                                 <path d="M7 13l3 3 7-7"></path>
                                                 <path d="M17 13l3 3 7-7" stroke-dasharray="0"></path>
@@ -6083,48 +6140,18 @@
                     }, 0);
                 }
                 
-                // Setup conversation interaction for long press
-                if (this.currentScreen === 'main' && this.currentTab === 'conversations') {
-                    setTimeout(() => {
-                        this.setupMessageInteraction();
-                    }, 0);
-                }
-                
                 // Apply accent color
                 this.applyAccentColor();
                 
                 // Apply accent gradient
                 this.applyAccentGradient(this.accentGradient);
-                
-                // Apply chat bubble shape
-                this.changeChatBubbleShape(this.chatBubbleShape, false);
             }
         };
         
         // Initialize the app
         app.init();
-        
-        // Run message cleanup on load and setup cron job
-        cleanupOldMessages();
-        
-        // Detect memory capability
-        console.log(`Device memory: ${navigator.deviceMemory || 'unknown'} GB`);
-        console.log(`Low memory mode: ${app.isLowMemoryDevice ? 'Enabled' : 'Disabled'}`);
-        
-        // Add event listeners for memory warning (Safari/iOS/Chrome)
-        if ('memory' in window.performance) {
-            const memoryInfo = window.performance.memory;
-            console.log(`Total JS heap size: ${Math.round(memoryInfo.totalJSHeapSize / (1024 * 1024))}MB`);
-            console.log(`Used JS heap size: ${Math.round(memoryInfo.usedJSHeapSize / (1024 * 1024))}MB`);
-            console.log(`JS heap limit: ${Math.round(memoryInfo.jsHeapSizeLimit / (1024 * 1024))}MB`);
-            
-            if (memoryInfo.usedJSHeapSize / memoryInfo.jsHeapSizeLimit > 0.7) {
-                app.isLowMemoryDevice = true;
-                document.documentElement.style.setProperty('--low-memory', '1');
-                console.warn('Memory usage is high, enabling low memory mode');
-            }
-        }
     </script>
 </body>
 </html>
+
 
